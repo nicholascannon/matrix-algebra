@@ -7,3 +7,6 @@ Written by Nicholas Cannon (22241579)
 - `make` -> compiles and builds executable
 - `make run` -> runs executable in ./bin
 - `make clean` -> cleans project (removes object files)
+
+**NOTE**
+May need to change the `CC` value in makefile. I'm running on osx and had to use gcc-9 as gcc is just a symlink to clang on osx =(
