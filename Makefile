@@ -1,3 +1,5 @@
+# See link below for template of this makefile
+# https://stackoverflow.com/questions/53136024/makefile-to-compile-all-c-files-without-needing-to-specify-them/53138757
 IDIR=./include
 ODIR=./obj
 LDIR=./lib
