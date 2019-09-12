@@ -12,7 +12,7 @@ CFLAGS=-Wall -Werror -pedantic -I$(IDIR)
 LIBS=-fopenmp
 SRCS=$(wildcard $(SDIR)/*.c)
 OBJS=$(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS))
-EXE=$(BDIR)/mysolution
+EXE=$(BDIR)/mysolution.exe
 
 .PHONY: run all clean
 
