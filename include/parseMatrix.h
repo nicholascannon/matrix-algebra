@@ -6,17 +6,34 @@
 #ifndef PARSE_MATRIX_HEADER
 #define PARSE_MATRIX_HEADER
 
+#define MAT_INT 0
+#define MAT_FLOAT 1
+
+#define BUF_SIZE 4  // 4 char buf size
+
 /* Coordinate Format struct */
 typedef struct {
-    int rows;
-    int cols;
-    int *NZ;  // non zero elements
-} COO_INT;
+    int row;
+    int col;
+} COO_ENTRY_BASE;
+
+typedef struct {
+    COO_ENTRY_BASE base;
+    int val;
+} COO_ENTRY_INT;
+
+typedef struct {
+    COO_ENTRY_BASE base;
+    float val;
+} COO_ENTRY_FLOAT;
+
 typedef struct {
     int rows;
     int cols;
-    float *NZ;  // non zero elements
-} COO_FLOAT;
+    int type;  // either MAT_INT or MAT_FLOAT
+    int nzsize;
+    COO_ENTRY_BASE **NZ;  // non zero elements
+} COO;
 
 /* Compressed Format struct (used for both compressed col and row) */
 typedef struct {
@@ -35,13 +52,12 @@ typedef struct {
 } CS_FLOAT;
 
 /* Function defs */
-COO_INT readCOO_INT(char *matFile);
-COO_FLOAT readCOO_FLOAT(char *matFile);
+int readCOO(char *matFile, COO *mat);
 
-CS_INT readCSR_INT(char *matFile);
-CS_FLOAT readCSR_FLOAT(char *matFile);
+int readCSR_INT(char *matFile, CS_INT *mat);
+int readCSR_FLOAT(char *matFile, CS_FLOAT *mat);
 
-CS_INT readCSC_INT(char *matFile);
-CS_FLOAT readCSC_FLOAT(char *matFile);
+int readCSC_INT(char *matFile, CS_INT *mat);
+int readCSC_FLOAT(char *matFile, CS_FLOAT *mat);
 
 #endif
