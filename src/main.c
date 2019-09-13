@@ -37,5 +37,11 @@ int main(int argc, char **argv) {
         }
     }
 
+    // TODO: parse matrix files and convert into matrix formats and time process
+
+    // TODO: switch on matOp and do matrix op and time process
+
+    // TODO: if lflag then log to file
+
     return EXIT_SUCCESS;
 }
