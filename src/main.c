@@ -3,7 +3,6 @@
  *
  * Written by Nicholas Cannon (22241579)
  */
-#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +37,5 @@ int main(int argc, char **argv) {
         }
     }
 
-    
     return EXIT_SUCCESS;
 }
