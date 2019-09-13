@@ -28,7 +28,7 @@ $(BDIR) $(ODIR):
 	md $@
 
 run: $(EXE)
-	$<
+	$< $(ARGS)
 
 clean:
 	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~ 
