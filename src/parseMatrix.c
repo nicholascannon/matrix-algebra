@@ -111,3 +111,13 @@ int readCOO(char *matFile, COO *mat) {
     fclose(fp);
     return 0;
 };
+
+/**
+ * Parses matFile into CSR matrix. Returns non zero on failure.
+ */
+int readCSR(char *matFile, CS *mat){};
+
+/**
+ * Parses matFile into CSC matrix. Returns non zero on failure.
+ */
+int readCSC(char *matFile, CS *mat){};

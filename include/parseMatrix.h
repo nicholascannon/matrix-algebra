@@ -37,27 +37,31 @@ typedef struct {
 
 /* Compressed Format struct (used for both compressed col and row) */
 typedef struct {
-    int rows;
-    int cols;
-    int *NNZ;  // non-zero elments
-    int *IA;
-    int *JA;
-} CS_INT;
+} CS_ENTRY_BASE;
+
+typedef struct {
+    CS_ENTRY_BASE base;
+    int val;
+} CS_ENTRY_INT;
+
+typedef struct {
+    CS_ENTRY_BASE base;
+    float val;
+} CS_ENTRY_FLOAT;
+
 typedef struct {
     int rows;
     int cols;
-    float *NNZ;  // non-zero elments
+    int type;             // either MAT_INT or MAT_FLOAT
+    CS_ENTRY_BASE **NNZ;  // non-zero elments
+    int nzsize;           // size of NNZ
     int *IA;
     int *JA;
-} CS_FLOAT;
+} CS;
 
 /* Function defs */
 int readCOO(char *matFile, COO *mat);
-
-int readCSR_INT(char *matFile, CS_INT *mat);
-int readCSR_FLOAT(char *matFile, CS_FLOAT *mat);
-
-int readCSC_INT(char *matFile, CS_INT *mat);
-int readCSC_FLOAT(char *matFile, CS_FLOAT *mat);
+int readCSR(char *matFile, CS *mat);
+int readCSC(char *matFile, CS *mat);
 
 #endif
