@@ -15,24 +15,32 @@
  *
  * Returns non zero on failuer.
  */
-int scalarMultiplication(COO *mat, COO *ans, float scalar) {
+int scalarMultiplication(COO *mat, COO *ans, float scalar, int numThreads) {
+    int i;
+
     // quick check on inputs
     if (mat->cols != ans->cols || mat->rows != ans->rows ||
         mat->nzsize != ans->nzsize) {
         return -1;
     }
 
+    if (numThreads) {
+        omp_set_num_threads(numThreads);
+    }
+
     if (mat->type == MAT_FLOAT) {
-        for (int i = 0; i < mat->nzsize; i++) {
+#pragma omp parallel for
+        for (i = 0; i < mat->nzsize; i++) {
             COO_ENTRY_FLOAT *fl =
                 (COO_ENTRY_FLOAT *)malloc(sizeof(COO_ENTRY_FLOAT));
-            memcpy(mat->NZ[i], fl, sizeof(COO_ENTRY_FLOAT));
+            memcpy(fl, mat->NZ[i], sizeof(COO_ENTRY_FLOAT));
 
             fl->val = fl->val * scalar;
             ans->NZ[i] = fl;
         }
     } else {
-        for (int i = 0; i < mat->nzsize; i++) {
+#pragma omp parallel for
+        for (i = 0; i < mat->nzsize; i++) {
             // Little bit more complicated here as we are storing floats anyway
             COO_ENTRY_FLOAT *fl =
                 (COO_ENTRY_FLOAT *)malloc(sizeof(COO_ENTRY_FLOAT));

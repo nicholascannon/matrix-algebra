@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
     int lflag = 0;
     int tflag = 0;  // if 1 then threadNum is set
-    int threadNum;
+    int threadNum = 0;
     int optIndex;
     char *mat1, *mat2;
     char matOp[3];  // two chars + null byte
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 
         // Do opertation
         start = clock();
-        scalarMultiplication(mat, ans, scalar);
+        scalarMultiplication(mat, ans, scalar, threadNum);
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
