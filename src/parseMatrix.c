@@ -69,6 +69,26 @@ int readCOO(char *matFile, COO *mat) {
 
                     mat->nzsize++;
                 }
+            } else {
+                // convert to int
+                float val = atoi(token);
+
+                if (val > 0.0) {
+                    // we have a non zero!
+                    COO_ENTRY_INT *fl =
+                        (COO_ENTRY_INT *)malloc(sizeof(COO_ENTRY_INT));
+                    fl->val = val;
+                    fl->base.row = row;
+                    fl->base.col = col;
+
+                    mat->NZ = realloc(
+                        mat->NZ, (mat->nzsize + 1) * sizeof(COO_ENTRY_INT));
+                    mat->NZ[mat->nzsize] = (COO_ENTRY_BASE *)fl;
+                    mat->NZ[mat->nzsize]->col = col;
+                    mat->NZ[mat->nzsize]->row = row;
+
+                    mat->nzsize++;
+                }
             }
 
             col++;
@@ -83,8 +103,8 @@ int readCOO(char *matFile, COO *mat) {
 
     // print our entries
     for (int i = 0; i < mat->nzsize; i++) {
-        COO_ENTRY_FLOAT *fl = mat->NZ[i];
-        printf("{ %f, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
+        COO_ENTRY_INT *fl = mat->NZ[i];
+        printf("{ %d, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
     }
 
     fclose(fp);
