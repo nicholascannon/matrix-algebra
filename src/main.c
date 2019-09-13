@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
             // TODO: log answer
         }
 
-        // clean up our allocation
+        // clean up our allocations
         free(mat);
         free(ans);
     } else if (strcmp(matOp, "tr")) {

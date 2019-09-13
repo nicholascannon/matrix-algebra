@@ -11,7 +11,7 @@
 
 #define BUF_SIZE 4  // 4 char buf size
 
-/* Coordinate Format struct */
+/* COORDINATE FORMAT STRUCT */
 typedef struct {
     int row;
     int col;
@@ -35,7 +35,7 @@ typedef struct {
     COO_ENTRY_BASE **NZ;  // non zero elements
 } COO;
 
-/* Compressed Format struct (used for both compressed col and row) */
+/* COMPRESSED FORMAT STRUCT */
 typedef struct {
 } CS_ENTRY_BASE;
 
@@ -61,7 +61,7 @@ typedef struct {
 
 /* Function defs */
 int readCOO(char *matFile, COO *mat);
-int readCSR(char *matFile, CS *mat);
-int readCSC(char *matFile, CS *mat);
+int readCSR(char *matFile, CS *mat);  // compressed row
+int readCSC(char *matFile, CS *mat);  // compressed col
 
 #endif
