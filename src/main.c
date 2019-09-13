@@ -18,8 +18,8 @@ int main(int argc, char **argv) {
     int optIndex;
     char *mat1, *mat2;
     char matOp[3];  // two chars + null byte
-    unsigned long loadTime = 0.0;
-    unsigned long opTime = 0.0;
+    double loadTime = 0.0;
+    double opTime = 0.0;
     clock_t start, end;
 
     // quick error check
@@ -55,16 +55,16 @@ int main(int argc, char **argv) {
     // TODO: do matrix op and time process
     // TODO: if lflag then log to file
 
-    if (strcmp(matOp, "sm")) {
+    if (strcmp(matOp, "sm\n")) {
         // scalar multiplication
-        float scalar = atof(argv[3]);  // argument just after --sm
+        float scalar = atof(argv[2]);  // argument just after --sm
 
         // read in matrix
         COO *mat = malloc(sizeof(COO));
         start = clock();
         readCOO(mat1, mat);
         end = clock();
-        loadTime = (end - start) / CLOCKS_PER_SEC;
+        loadTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         // set up answer matrix, basically going to be same size as input
         COO *ans = malloc(sizeof(COO));
@@ -78,7 +78,14 @@ int main(int argc, char **argv) {
         start = clock();
         scalarMultiplication(mat, ans, scalar);
         end = clock();
-        opTime = (end - start) / CLOCKS_PER_SEC;
+        opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        // print our entries FOR DEBUG
+        for (int i = 0; i < ans->nzsize; i++) {
+            COO_ENTRY_FLOAT *fl = ans->NZ[i];
+            printf("{ %f, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
+        }
+        printf("%f\n", opTime);
 
         if (lflag) {
             // TODO: log answer
@@ -97,7 +104,7 @@ int main(int argc, char **argv) {
         // matrix multiplication
     } else {
         // invalid matrix op
-        prinf("Invalid matrix operation!\n");
+        printf("Invalid matrix operation!\n");
         return EXIT_FAILURE;
     }
 
