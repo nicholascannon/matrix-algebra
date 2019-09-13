@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "logResult.h"
 #include "matrixOp.h"
 #include "parseMatrix.h"
@@ -17,6 +18,9 @@ int main(int argc, char **argv) {
     int optIndex;
     char *mat1, *mat2;
     char matOp[3];  // two chars + null byte
+    unsigned long loadTime = 0.0;
+    unsigned long opTime = 0.0;
+    clock_t start, end;
 
     // quick error check
     if (argc < 2) {
@@ -51,26 +55,51 @@ int main(int argc, char **argv) {
     // TODO: do matrix op and time process
     // TODO: if lflag then log to file
 
-    COO *mymat = malloc(sizeof(COO));
-    readCOO(mat1, mymat);
-    free(mymat);
+    if (strcmp(matOp, "sm")) {
+        // scalar multiplication
+        float scalar = atof(argv[3]);  // argument just after --sm
 
-    // if (strcmp(matOp, "sm")) {
-    //     // scalar multiplication
-    //     float scalar = atof(argv[3]);  // argument just after --sm
-    // } else if (strcmp(matOp, "tr")) {
-    //     // trace
-    // } else if (strcmp(matOp, "ad")) {
-    //     // matrix addition
-    // } else if (strcmp(matOp, "ts")) {
-    //     // transpose
-    // } else if (strcmp(matOp, "mm")) {
-    //     // matrix multiplication
-    // } else {
-    //     // invalid matrix op
-    //     prinf("Invalid matrix operation!\n");
-    //     return EXIT_FAILURE;
-    // }
+        // read in matrix
+        COO *mat = malloc(sizeof(COO));
+        start = clock();
+        readCOO(mat1, mat);
+        end = clock();
+        loadTime = (end - start) / CLOCKS_PER_SEC;
+
+        // set up answer matrix, basically going to be same size as input
+        COO *ans = malloc(sizeof(COO));
+        ans->cols = mat->cols;
+        ans->rows = mat->rows;
+        ans->nzsize = mat->nzsize;
+        ans->type = MAT_FLOAT;  // scalar is a float value
+        ans->NZ = malloc(ans->nzsize * sizeof(COO_ENTRY_FLOAT));
+
+        // Do opertation
+        start = clock();
+        scalarMultiplication(mat, ans, scalar);
+        end = clock();
+        opTime = (end - start) / CLOCKS_PER_SEC;
+
+        if (lflag) {
+            // TODO: log answer
+        }
+
+        // clean up our allocation
+        free(mat);
+        free(ans);
+    } else if (strcmp(matOp, "tr")) {
+        // trace
+    } else if (strcmp(matOp, "ad")) {
+        // matrix addition
+    } else if (strcmp(matOp, "ts")) {
+        // transpose
+    } else if (strcmp(matOp, "mm")) {
+        // matrix multiplication
+    } else {
+        // invalid matrix op
+        prinf("Invalid matrix operation!\n");
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

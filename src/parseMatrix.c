@@ -39,9 +39,10 @@ int readCOO(char *matFile, COO *mat) {
     fgets(line, BUF_SIZE, fp);
     mat->cols = atoi(line);
 
-    printf("mat type = %d\n", mat->type);
-    printf("rows = %d\n", mat->rows);
-    printf("cols = %d \n", mat->cols);
+    // DEBUG ONLY
+    // printf("mat type = %d\n", mat->type);
+    // printf("rows = %d\n", mat->rows);
+    // printf("cols = %d \n", mat->cols);
 
     // process matrix data
     mat->nzsize = 0;
@@ -101,11 +102,11 @@ int readCOO(char *matFile, COO *mat) {
         }
     }
 
-    // print our entries
-    for (int i = 0; i < mat->nzsize; i++) {
-        COO_ENTRY_INT *fl = mat->NZ[i];
-        printf("{ %d, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
-    }
+    // print our entries FOR DEBUG
+    // for (int i = 0; i < mat->nzsize; i++) {
+    //     COO_ENTRY_INT *fl = mat->NZ[i];
+    //     printf("{ %d, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
+    // }
 
     fclose(fp);
     return 0;
