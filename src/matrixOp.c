@@ -102,3 +102,5 @@ int trace_FLOAT(COO *mat, float *ans) {
     *ans = trace_sum;
     return 0;
 };
+
+int matrixAddition(COO *mat1, COO *mat2, COO *ans){};

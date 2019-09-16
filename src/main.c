@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     int tflag = 0;  // if 1 then threadNum is set
     int threadNum = 0;
     int optIndex;
-    char *mat1, *mat2;
+    char *mat1Path, *mat2Path;
     char matOp[3];  // two chars + null byte
     double loadTime = 0.0;
     double opTime = 0.0;
@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
                     threadNum = atoi(argv[optIndex + 1]);
                     break;
                 case 'f':
-                    mat1 = argv[optIndex + 1];
+                    mat1Path = argv[optIndex + 1];
                     if (strcmp(matOp, "ad") || strcmp(matOp, "mm")) {
                         // two matrices provided
-                        mat2 = argv[optIndex + 2];
+                        mat2Path = argv[optIndex + 2];
                     }
             }
         }
@@ -63,14 +63,14 @@ int main(int argc, char **argv) {
         // read in matrix
         COO *mat = malloc(sizeof(COO));
         start = clock();
-        readCOO(mat1, mat);
+        readCOO(mat1Path, mat);
         end = clock();
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (status == -1) {
             // failed to open file!
             free(mat);
-            printf("Failed to open matrix: %s\n", mat1);
+            printf("Failed to open matrix: %s\n", mat1Path);
             return EXIT_FAILURE;
         }
 
@@ -101,14 +101,14 @@ int main(int argc, char **argv) {
         // read in matrix
         COO *mat = malloc(sizeof(COO));
         start = clock();
-        status = readCOO(mat1, mat);
+        status = readCOO(mat1Path, mat);
         end = clock();
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (status == -1) {
             // failed to open file!
             free(mat);
-            printf("Failed to open matrix: %s\n", mat1);
+            printf("Failed to open matrix: %s\n", mat1Path);
             return EXIT_FAILURE;
         }
 
@@ -145,11 +145,45 @@ int main(int argc, char **argv) {
         }
 
         free(mat);
-    } else if (strcmp(matOp, "ad")) {
+    } else if (strcmp(matOp, "ad") == 0) {
         // matrix addition
-    } else if (strcmp(matOp, "ts")) {
+        int status2;
+
+        // read in both matrices
+        COO *mat1 = (COO *)malloc(sizeof(COO));
+        COO *mat2 = (COO *)malloc(sizeof(COO));
+        COO *ans = (COO *)malloc(sizeof(COO));
+
+        start = clock();
+        status = readCOO(mat1Path, mat1);
+        status2 = readCOO(mat2Path, mat2);
+        end = clock();
+        loadTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (status == -1 || status2 == -1) {
+            // failed to open file!
+            free(mat1);
+            free(mat2);
+            printf("Failed to open matrices: %s and %s\n", mat1Path, mat2Path);
+            return EXIT_FAILURE;
+        }
+
+        start = clock();
+        matrixAddition(mat1, mat2, ans);
+        end = clock();
+        opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (lflag) {
+            // TODO: log output
+        }
+
+        // free up memory
+        free(mat1);
+        free(mat2);
+        free(ans);
+    } else if (strcmp(matOp, "ts") == 0) {
         // transpose
-    } else if (strcmp(matOp, "mm")) {
+    } else if (strcmp(matOp, "mm") == 0) {
         // matrix multiplication
     } else {
         // invalid matrix op

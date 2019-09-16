@@ -12,4 +12,6 @@ int scalarMultiplication(COO *mat, COO *ans, float scalar, int numThreads);
 int trace_INT(COO *mat, int *ans);
 int trace_FLOAT(COO *mat, float *ans);
 
+int matrixAddition(COO *mat1, COO *mat2, COO *ans);
+
 #endif
