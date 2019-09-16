@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
     char matOp[3];  // two chars + null byte
     double loadTime = 0.0;
     double opTime = 0.0;
+    int status;
     clock_t start, end;
 
     // quick error check
@@ -66,6 +67,13 @@ int main(int argc, char **argv) {
         end = clock();
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
 
+        if (status == -1) {
+            // failed to open file!
+            free(mat);
+            printf("Failed to open matrix: %s\n", mat1);
+            return EXIT_FAILURE;
+        }
+
         // set up answer matrix, basically going to be same size as input
         COO *ans = malloc(sizeof(COO));
         ans->cols = mat->cols;
@@ -80,13 +88,6 @@ int main(int argc, char **argv) {
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
-        // print our entries FOR DEBUG
-        for (int i = 0; i < ans->nzsize; i++) {
-            COO_ENTRY_FLOAT *fl = ans->NZ[i];
-            printf("{ %f, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
-        }
-        printf("%f\n", opTime);
-
         if (lflag) {
             // TODO: log answer
         }
@@ -96,27 +97,51 @@ int main(int argc, char **argv) {
         free(ans);
     } else if (strcmp(matOp, "tr") == 0) {
         // trace
-        CS *mat = malloc(sizeof(CS));
 
-        readCSR(mat1, mat);
+        // read in matrix
+        COO *mat = malloc(sizeof(COO));
+        start = clock();
+        status = readCOO(mat1, mat);
+        end = clock();
+        loadTime = (double)(end - start) / CLOCKS_PER_SEC;
 
-        printf("rows= %d, cols=%d nnzsize=%d\n", mat->rows, mat->cols,
-               mat->nnzsize);
-        printf("NNZ = ");
-        for (int i = 0; i < mat->nnzsize; i++) {
-            CS_ENTRY_INT *fl = mat->NNZ[i];
-            printf("%d", fl->val);
-        }
-        printf("\n");
-        printf("JA = ");
-        for (int i = 0; i < mat->nnzsize; i++) {
-            printf("%d, ", *(mat->JA + i));
+        if (status == -1) {
+            // failed to open file!
+            free(mat);
+            printf("Failed to open matrix: %s\n", mat1);
+            return EXIT_FAILURE;
         }
 
-        printf("\n");
-        printf("IA = ");
-        for (int i = 0; i < mat->rows + 1; i++) {
-            printf("%d, ", mat->IA[i]);
+        // trace is only defined for square matrices (row = cols)
+        if (mat->rows != mat->cols) {
+            printf("Invalid operation: Trace on non square matrix\n");
+            free(mat);
+            return EXIT_FAILURE;
+        }
+
+        // Do opertation
+        if (mat->type == MAT_FLOAT) {
+            float ans;
+
+            start = clock();
+            trace_FLOAT(mat, &ans);
+            end = clock();
+            opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+            printf("%f\n", ans);
+        } else {
+            int ans;
+
+            start = clock();
+            trace_INT(mat, &ans);
+            end = clock();
+            opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+            printf("%d\n", ans);
+        }
+
+        if (lflag) {
+            // TODO: log answer
         }
 
         free(mat);

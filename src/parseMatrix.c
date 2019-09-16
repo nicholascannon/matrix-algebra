@@ -9,7 +9,8 @@
 #include <string.h>
 
 /**
- *  Parses matFile into a COO matrix. Returns non zero on error.
+ *  Parses matFile into a COO matrix. Returns non zero on error (-1 if failed to
+ *  open file).
  */
 int readCOO(char *matFile, COO *mat) {
     FILE *fp;
@@ -21,22 +22,25 @@ int readCOO(char *matFile, COO *mat) {
     // open file and check for errors
     fp = fopen(matFile, "r");
     if (fp == NULL) {
-        return 1;
+        return -1;
     }
 
     // get data type
     fgets(line, BUFSIZ, fp);
-    line[strcspn(line, "\n")] = '\0';  // remove new line for comparison
-    if (strcmp(line, "int") == 0) {
+    if (strcmp(line, "int\n") == 0) {
         mat->type = MAT_INT;
-    } else {
+    } else if (strcmp(line, "float\n") == 0) {
         mat->type = MAT_FLOAT;
+    } else {
+        // fail
+        fclose(fp);
+        return 1;
     }
 
     // get rows and cols
-    fgets(line, BUF_SIZE, fp);
+    fgets(line, BUFSIZ, fp);
     mat->rows = atoi(line);
-    fgets(line, BUF_SIZE, fp);
+    fgets(line, BUFSIZ, fp);
     mat->cols = atoi(line);
 
     mat->NZ = NULL;

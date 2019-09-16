@@ -54,3 +54,51 @@ int scalarMultiplication(COO *mat, COO *ans, float scalar, int numThreads) {
 
     return 0;
 };
+
+/**
+ * Performs a trace on an INTEGER matrix and stores the answer in the ans
+ * variable. Trace is the sum of each diagonal element. Note: this function is
+ * only defined for square matrices.
+ *
+ * Returns non-zero on failure.
+ */
+int trace_INT(COO *mat, int *ans) {
+    // basic input sanitization
+    if (mat->type != MAT_INT || mat->cols != mat->rows) {
+        return -1;
+    }
+
+    int trace_sum = 0;
+    for (int i = 0; i < mat->nzsize; i++) {
+        if (mat->NZ[i]->col == mat->NZ[i]->row) {
+            trace_sum += ((COO_ENTRY_INT *)mat->NZ[i])->val;
+        }
+    }
+
+    *ans = trace_sum;
+    return 0;
+};
+
+/**
+ * Performs a trace on an FLOAT matrix and stores the answer in the ans
+ * variable. Trace is the sum of each diagonal element. Note: this function is
+ * only defined for square matrices.
+ *
+ * Returns non-zero on failure.
+ */
+int trace_FLOAT(COO *mat, float *ans) {
+    // basic input sanitization
+    if (mat->type != MAT_FLOAT || mat->cols != mat->rows) {
+        return -1;
+    }
+
+    float trace_sum = 0.0;
+    for (int i = 0; i < mat->nzsize; i++) {
+        if (mat->NZ[i]->col == mat->NZ[i]->row) {
+            trace_sum += ((COO_ENTRY_FLOAT *)mat->NZ[i])->val;
+        }
+    }
+
+    *ans = trace_sum;
+    return 0;
+};

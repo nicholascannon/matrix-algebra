@@ -9,5 +9,7 @@
 #define MATRIX_OP_HEADER
 
 int scalarMultiplication(COO *mat, COO *ans, float scalar, int numThreads);
+int trace_INT(COO *mat, int *ans);
+int trace_FLOAT(COO *mat, float *ans);
 
 #endif
