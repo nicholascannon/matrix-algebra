@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     // TODO: do matrix op and time process
     // TODO: if lflag then log to file
 
-    if (strcmp(matOp, "sm\n")) {
+    if (strcmp(matOp, "sm") == 0) {
         // scalar multiplication
         float scalar = atof(argv[2]);  // argument just after --sm
 
@@ -94,8 +94,32 @@ int main(int argc, char **argv) {
         // clean up our allocations
         free(mat);
         free(ans);
-    } else if (strcmp(matOp, "tr")) {
+    } else if (strcmp(matOp, "tr") == 0) {
         // trace
+        CS *mat = malloc(sizeof(CS));
+
+        readCSR(mat1, mat);
+
+        printf("rows= %d, cols=%d nnzsize=%d\n", mat->rows, mat->cols,
+               mat->nnzsize);
+        printf("NNZ = ");
+        for (int i = 0; i < mat->nnzsize; i++) {
+            CS_ENTRY_INT *fl = mat->NNZ[i];
+            printf("%d", fl->val);
+        }
+        printf("\n");
+        printf("JA = ");
+        for (int i = 0; i < mat->nnzsize; i++) {
+            printf("%d, ", *(mat->JA + i));
+        }
+
+        printf("\n");
+        printf("IA = ");
+        for (int i = 0; i < mat->rows + 1; i++) {
+            printf("%d, ", mat->IA[i]);
+        }
+
+        free(mat);
     } else if (strcmp(matOp, "ad")) {
         // matrix addition
     } else if (strcmp(matOp, "ts")) {

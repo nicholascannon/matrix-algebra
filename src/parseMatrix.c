@@ -39,13 +39,10 @@ int readCOO(char *matFile, COO *mat) {
     fgets(line, BUF_SIZE, fp);
     mat->cols = atoi(line);
 
-    // DEBUG ONLY
-    // printf("mat type = %d\n", mat->type);
-    // printf("rows = %d\n", mat->rows);
-    // printf("cols = %d \n", mat->cols);
+    mat->NZ = NULL;
+    mat->nzsize = 0;
 
     // process matrix data
-    mat->nzsize = 0;
     while (fgets(line, BUFSIZ, fp) != NULL) {
         token = strtok(line, " ");
 
@@ -54,7 +51,7 @@ int readCOO(char *matFile, COO *mat) {
                 // convert to float
                 float val = atof(token);
 
-                if (val > 0.0) {
+                if (val > 0.0 || val < 0.0) {
                     // we have a non zero!
                     COO_ENTRY_FLOAT *fl =
                         (COO_ENTRY_FLOAT *)malloc(sizeof(COO_ENTRY_FLOAT));
@@ -65,16 +62,14 @@ int readCOO(char *matFile, COO *mat) {
                     mat->NZ = realloc(
                         mat->NZ, (mat->nzsize + 1) * sizeof(COO_ENTRY_FLOAT));
                     mat->NZ[mat->nzsize] = (COO_ENTRY_BASE *)fl;
-                    mat->NZ[mat->nzsize]->col = col;
-                    mat->NZ[mat->nzsize]->row = row;
 
                     mat->nzsize++;
                 }
             } else {
                 // convert to int
-                float val = atoi(token);
+                int val = atoi(token);
 
-                if (val > 0.0) {
+                if (val > 0 || val < 0) {
                     // we have a non zero!
                     COO_ENTRY_INT *fl =
                         (COO_ENTRY_INT *)malloc(sizeof(COO_ENTRY_INT));
@@ -85,8 +80,6 @@ int readCOO(char *matFile, COO *mat) {
                     mat->NZ = realloc(
                         mat->NZ, (mat->nzsize + 1) * sizeof(COO_ENTRY_INT));
                     mat->NZ[mat->nzsize] = (COO_ENTRY_BASE *)fl;
-                    mat->NZ[mat->nzsize]->col = col;
-                    mat->NZ[mat->nzsize]->row = row;
 
                     mat->nzsize++;
                 }
@@ -102,12 +95,6 @@ int readCOO(char *matFile, COO *mat) {
         }
     }
 
-    // print our entries FOR DEBUG
-    // for (int i = 0; i < mat->nzsize; i++) {
-    //     COO_ENTRY_INT *fl = mat->NZ[i];
-    //     printf("{ %d, %d, %d }\n", fl->val, fl->base.row, fl->base.col);
-    // }
-
     fclose(fp);
     return 0;
 };
@@ -115,7 +102,107 @@ int readCOO(char *matFile, COO *mat) {
 /**
  * Parses matFile into CSR matrix. Returns non zero on failure.
  */
-int readCSR(char *matFile, CS *mat){};
+int readCSR(char *matFile, CS *mat) {
+    FILE *fp;
+    char line[BUFSIZ];
+    char *token;
+    int col = 0;
+    int row = 0;
+    int nnzCount = 0;
+
+    // open file and check for errors
+    fp = fopen(matFile, "r");
+    if (fp == NULL) {
+        return 1;
+    }
+
+    // get data type
+    fgets(line, BUFSIZ, fp);
+    line[strcspn(line, "\n")] = '\0';  // remove new line for comparison
+    if (strcmp(line, "int") == 0) {
+        mat->type = MAT_INT;
+    } else {
+        mat->type = MAT_FLOAT;
+    }
+
+    // get rows and cols
+    fgets(line, BUF_SIZE, fp);
+    mat->rows = atoi(line);
+    fgets(line, BUF_SIZE, fp);
+    mat->cols = atoi(line);
+
+    // Initialise IA array
+    mat->IA = malloc((mat->rows + 1) * sizeof(int));
+    mat->IA[0] = 0;  // convention
+
+    mat->NNZ = NULL;
+    mat->JA = NULL;
+    mat->nnzsize = 0;
+
+    // process matrix data
+    while (fgets(line, BUFSIZ, fp) != NULL) {
+        token = strtok(line, " ");
+
+        while (token != NULL) {
+            if (mat->type == MAT_FLOAT) {
+                // process floats
+                float val = atof(token);
+
+                if (val > 0.0 || val < 0.0) {
+                    // this is a non zero
+                    CS_ENTRY_FLOAT *fl = malloc(sizeof(CS_ENTRY_FLOAT));
+                    fl->val = val;
+
+                    mat->NNZ = realloc(
+                        mat->NNZ, (mat->nnzsize + 1) * sizeof(CS_ENTRY_FLOAT));
+                    mat->JA =
+                        realloc(mat->JA, (mat->nnzsize + 1) * sizeof(int));
+
+                    mat->NNZ[mat->nnzsize] = (CS_ENTRY_BASE *)fl;
+                    mat->JA[mat->nnzsize] = col;
+
+                    mat->nnzsize++;
+                    nnzCount++;
+                }
+            } else {
+                // process ints
+                int val = atoi(token);
+
+                if (val > 0 || val < 0) {
+                    // this is a non zero
+                    CS_ENTRY_INT *fl =
+                        (CS_ENTRY_INT *)malloc(sizeof(CS_ENTRY_INT));
+                    fl->val = val;
+
+                    mat->NNZ = realloc(
+                        mat->NNZ, (mat->nnzsize + 1) * sizeof(CS_ENTRY_INT));
+                    mat->JA =
+                        realloc(mat->JA, (mat->nnzsize + 1) * sizeof(int));
+
+                    mat->NNZ[mat->nnzsize] = (CS_ENTRY_BASE *)fl;
+                    mat->JA[mat->nnzsize] = col;
+
+                    mat->nnzsize++;
+                    nnzCount++;
+                }
+            }
+
+            col++;
+            if (col == mat->cols) {
+                mat->IA[row + 1] = mat->IA[row] + nnzCount;
+
+                // wrap around
+                nnzCount = 0;
+                col = 0;
+                row++;
+            }
+            token = strtok(NULL, " ");
+        }
+    }
+
+    fclose(fp);
+    return 0;
+};
 
 /**
  * Parses matFile into CSC matrix. Returns non zero on failure.

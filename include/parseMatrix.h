@@ -37,6 +37,7 @@ typedef struct {
 
 /* COMPRESSED FORMAT STRUCT */
 typedef struct {
+    int dummy;
 } CS_ENTRY_BASE;
 
 typedef struct {
@@ -52,11 +53,11 @@ typedef struct {
 typedef struct {
     int rows;
     int cols;
-    int type;             // either MAT_INT or MAT_FLOAT
-    CS_ENTRY_BASE **NNZ;  // non-zero elments
-    int nzsize;           // size of NNZ
+    int nnzsize;  // size of NNZ
+    int type;     // either MAT_INT or MAT_FLOAT
     int *IA;
     int *JA;
+    CS_ENTRY_BASE **NNZ;  // non-zero elments
 } CS;
 
 /* Function defs */
