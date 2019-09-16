@@ -9,8 +9,6 @@
 #define MAT_INT 0
 #define MAT_FLOAT 1
 
-#define BUF_SIZE 4  // 4 char buf size
-
 /* COORDINATE FORMAT STRUCT */
 typedef struct {
     int row;

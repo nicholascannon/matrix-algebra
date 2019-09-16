@@ -130,9 +130,9 @@ int readCSR(char *matFile, CS *mat) {
     }
 
     // get rows and cols
-    fgets(line, BUF_SIZE, fp);
+    fgets(line, BUFSIZ, fp);
     mat->rows = atoi(line);
-    fgets(line, BUF_SIZE, fp);
+    fgets(line, BUFSIZ, fp);
     mat->cols = atoi(line);
 
     // Initialise IA array
@@ -235,9 +235,9 @@ int readCSC(char *matFile, CS *mat){
     // }
 
     // // get rows and cols
-    // fgets(line, BUF_SIZE, fp);
+    // fgets(line, BUFSIZ, fp);
     // mat->rows = atoi(line);
-    // fgets(line, BUF_SIZE, fp);
+    // fgets(line, BUFSIZ, fp);
     // mat->cols = atoi(line);
 
     // // Initialise IA array
