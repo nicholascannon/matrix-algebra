@@ -191,12 +191,10 @@ int main(int argc, char **argv) {
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
-        for (int i = 0; i < ans->nzsize; i++) {
-            printf("%d ", ((COO_ENTRY_INT *)ans->NZ[i])->val);
-        }
-
         if (lflag) {
-            // TODO: log output
+            // log output
+            logCOO(matOp, mat1Path, mat2Path, omp_get_thread_num(), ans,
+                   loadTime, opTime);
         }
 
         // free up memory
