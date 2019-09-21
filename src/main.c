@@ -15,7 +15,7 @@
 
 int main(int argc, char **argv) {
     int lflag = 0;
-    int threadNum = 0; // non zero if set by CLA
+    int threadNum = 0;  // non zero if set by CLA
     int optIndex;
     char *mat1Path, *mat2Path;
     char matOp[3];  // two chars + null byte
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    // matrix operation always first CLA!
+    // NOTE: matrix operation always first CLA!
     strncpy(matOp, (argv[1] + 2), 3);
 
     for (optIndex = 0; optIndex < argc; optIndex++) {
@@ -62,11 +62,12 @@ int main(int argc, char **argv) {
     // TODO: if lflag then log to file
 
     if (strcmp(matOp, "sm") == 0) {
-        // scalar multiplication
+        /* SCALAR MULTIPLICATION */
         float scalar = atof(argv[2]);  // argument just after --sm
+        COO *mat = malloc(sizeof(COO));
+        COO *ans = malloc(sizeof(COO));
 
         // read in matrix
-        COO *mat = malloc(sizeof(COO));
         start = clock();
         readCOO(mat1Path, mat);
         end = clock();
@@ -75,17 +76,10 @@ int main(int argc, char **argv) {
         if (status == -1) {
             // failed to open file!
             free(mat);
+            free(ans);
             printf("Failed to open matrix: %s\n", mat1Path);
             return EXIT_FAILURE;
         }
-
-        // set up answer matrix, basically going to be same size as input
-        COO *ans = malloc(sizeof(COO));
-        ans->cols = mat->cols;
-        ans->rows = mat->rows;
-        ans->nzsize = mat->nzsize;
-        ans->type = MAT_FLOAT;  // scalar is a float value
-        ans->NZ = malloc(ans->nzsize * sizeof(COO_ENTRY_FLOAT));
 
         // Do opertation
         start = clock();
@@ -101,10 +95,10 @@ int main(int argc, char **argv) {
         free(mat);
         free(ans);
     } else if (strcmp(matOp, "tr") == 0) {
-        // trace
+        /* MATRIX TRACE */
+        COO *mat = malloc(sizeof(COO));
 
         // read in matrix
-        COO *mat = malloc(sizeof(COO));
         start = clock();
         status = readCOO(mat1Path, mat);
         end = clock();
@@ -117,7 +111,7 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
 
-        // trace is only defined for square matrices (row = cols)
+        // trace is only defined for square matrices (rows = cols)
         if (mat->rows != mat->cols) {
             printf("Invalid operation: Trace on non square matrix\n");
             free(mat);
@@ -153,18 +147,25 @@ int main(int argc, char **argv) {
 
         free(mat);
     } else if (strcmp(matOp, "ad") == 0) {
-        // matrix addition
-        int status2;
-
-        // read in both matrices
+        /* MATRIX ADDITION */
+        int status2 = 0;
         COO *mat1 = (COO *)malloc(sizeof(COO));
         COO *mat2 = (COO *)malloc(sizeof(COO));
         COO *ans = (COO *)malloc(sizeof(COO));
 
-        start = clock();
-        status = readCOO(mat1Path, mat1);
-        status2 = readCOO(mat2Path, mat2);
-        end = clock();
+        if (strcmp(mat1Path, mat2Path) == 0) {
+            // no point reading same file twice!
+            start = clock();
+            status = readCOO(mat1Path, mat1);
+            *mat2 = *mat1;
+            end = clock();
+        } else {
+            // read in both matrices
+            start = clock();
+            status = readCOO(mat1Path, mat1);
+            status2 = readCOO(mat2Path, mat2);
+            end = clock();
+        }
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (status == -1 || status2 == -1) {
@@ -203,11 +204,11 @@ int main(int argc, char **argv) {
         free(mat2);
         free(ans);
     } else if (strcmp(matOp, "ts") == 0) {
-        // transpose
+        /* MATRIX TRANSPOSE */
     } else if (strcmp(matOp, "mm") == 0) {
-        // matrix multiplication
+        /* MATRIX MULTIPLICATION */
     } else {
-        // invalid matrix op
+        /* INVALID OPERATION */
         printf("Invalid matrix operation!\n");
         return EXIT_FAILURE;
     }

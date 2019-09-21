@@ -17,14 +17,10 @@
  */
 int scalarMultiplication(COO *mat, COO *ans, float scalar) {
     int i;
-
-    // quick check on inputs
-    if (mat->cols != ans->cols || mat->rows != ans->rows ||
-        mat->nzsize != ans->nzsize) {
-        return -1;
-    }
+    *ans = *mat;  // copy over meta info for answer matrix
 
     if (mat->type == MAT_FLOAT) {
+        ans->NZ = malloc(ans->nzsize * sizeof(COO_ENTRY_FLOAT));
 #pragma omp parallel for
         for (i = 0; i < mat->nzsize; i++) {
             COO_ENTRY_FLOAT *fl =
@@ -34,6 +30,7 @@ int scalarMultiplication(COO *mat, COO *ans, float scalar) {
             ans->NZ[i] = fl;
         }
     } else {
+        ans->NZ = malloc(ans->nzsize * sizeof(COO_ENTRY_INT));
 #pragma omp parallel for
         for (i = 0; i < mat->nzsize; i++) {
             COO_ENTRY_INT *fl = (COO_ENTRY_INT *)malloc(sizeof(COO_ENTRY_INT));
@@ -109,11 +106,9 @@ int matrixAddition(COO *mat1, COO *mat2, COO *ans) {
     if (mat1->cols != mat2->cols || mat1->rows != mat2->rows) return -1;
 
     // set up the answer matrix
+    *ans = *mat1;
     ans->NZ = NULL;
     ans->nzsize = 0;
-    ans->rows = mat1->rows;
-    ans->cols = mat1->cols;
-    ans->type = mat1->type;
 
     int m1i = 0;
     int m2i = 0;
