@@ -9,7 +9,8 @@
 #define LOG_RESULT_HEADER
 
 #define STUDENT_NUM "22241579"
-#define LOG_FILE_LEN 30
+#define LOG_FILENAME_LEN 30
+#define LOG_PATH "./data/logs/"
 
 int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
            float loadTime, float opTime);
