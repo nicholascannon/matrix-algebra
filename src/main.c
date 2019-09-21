@@ -30,9 +30,8 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    // NOTE: matrix operation always first CLA!
-    strncpy(matOp, (argv[1] + 2), 3);
-
+    /* Parse CLA's */
+    strncpy(matOp, (argv[1] + 2), 3);  // matrix operation always first CLA!
     for (optIndex = 0; optIndex < argc; optIndex++) {
         if (argv[optIndex][0] == '-') {
             switch (argv[optIndex][1]) {
@@ -57,6 +56,7 @@ int main(int argc, char **argv) {
         omp_set_num_threads(threadNum);
     }
 
+    /* MATRIX OPERATION SWITCH */
     if (strcmp(matOp, "sm") == 0) {
         /* SCALAR MULTIPLICATION */
         float scalar = atof(argv[2]);  // argument just after --sm
