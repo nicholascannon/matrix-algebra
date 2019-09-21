@@ -200,6 +200,37 @@ int main(int argc, char **argv) {
         free(ans);
     } else if (strcmp(matOp, "ts") == 0) {
         /* MATRIX TRANSPOSE */
+        COO *mat = malloc(sizeof(COO));
+        COO *ans = malloc(sizeof(COO));
+
+        // read in matrix
+        start = clock();
+        readCOO(mat1Path, mat);
+        end = clock();
+        loadTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (status == -1) {
+            // failed to open file!
+            free(mat);
+            free(ans);
+            printf("Failed to open matrix: %s\n", mat1Path);
+            return EXIT_FAILURE;
+        }
+
+        // Do opertation
+        start = clock();
+        matrixTranspose(mat, ans);
+        end = clock();
+        opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (lflag) {
+            logCOO(matOp, mat1Path, NULL, threadNum, ans, loadTime, opTime,
+                   NULL);
+        }
+
+        // clean up our allocations
+        free(mat);
+        free(ans);
     } else if (strcmp(matOp, "mm") == 0) {
         /* MATRIX MULTIPLICATION */
     } else {

@@ -12,5 +12,6 @@ int scalarMultiplication(COO *mat, COO *ans, float scalar);
 int trace_INT(COO *mat, int *ans);
 int trace_FLOAT(COO *mat, float *ans);
 int matrixAddition(COO *mat1, COO *mat2, COO *ans);
+int matrixTranspose(COO *mat, COO *ans);
 
 #endif

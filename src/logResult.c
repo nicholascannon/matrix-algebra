@@ -139,6 +139,6 @@ int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
  * non-zero on failure
  */
 int logCSR(char* op, char* file1, char* file2, int threadNum, CS* mat,
-           float loadTime, float opTime) {
+           float loadTime, float opTime, char* scalar) {
     return 0;
 }

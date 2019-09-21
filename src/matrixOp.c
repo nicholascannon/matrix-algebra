@@ -271,3 +271,23 @@ int matrixAddition(COO *mat1, COO *mat2, COO *ans) {
     }
     return 0;
 }
+
+/**
+ * Transposes matrix mat and stores it in ans. Returns non-zero on failure.
+ */
+int matrixTranspose(COO *mat, COO *ans) {
+    *ans = *mat;
+    int i;
+
+#pragma omp parallel for
+    for (i = 0; i < ans->nzsize; i++) {
+        if (ans->NZ[i]->row == ans->NZ[i]->col) continue;
+
+        // swap row index for column index
+        int temp = ans->NZ[i]->row;
+        ans->NZ[i]->row = ans->NZ[i]->col;
+        ans->NZ[i]->col = temp;
+    }
+
+    return 0;
+}
