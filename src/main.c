@@ -3,24 +3,25 @@
  *
  * Written by Nicholas Cannon (22241579)
  */
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #include "logResult.h"
 #include "matrixOp.h"
 #include "parseMatrix.h"
 
 int main(int argc, char **argv) {
     int lflag = 0;
-    int tflag = 0;  // if 1 then threadNum is set
-    int threadNum = 0;
+    int threadNum = 0; // non zero if set by CLA
     int optIndex;
     char *mat1Path, *mat2Path;
     char matOp[3];  // two chars + null byte
     double loadTime = 0.0;
     double opTime = 0.0;
-    int status;
+    int status = 0;
     clock_t start, end;
 
     // quick error check
@@ -39,7 +40,6 @@ int main(int argc, char **argv) {
                     lflag = 1;
                     break;
                 case 't':
-                    tflag = 1;
                     threadNum = atoi(argv[optIndex + 1]);
                     break;
                 case 'f':
@@ -50,6 +50,11 @@ int main(int argc, char **argv) {
                     }
             }
         }
+    }
+
+    // check if number of threads has been specified
+    if (threadNum != 0) {
+        omp_set_num_threads(threadNum);
     }
 
     // TODO: parse matrix files and convert into matrix formats and time process
@@ -84,7 +89,7 @@ int main(int argc, char **argv) {
 
         // Do opertation
         start = clock();
-        scalarMultiplication(mat, ans, scalar, threadNum);
+        scalarMultiplication(mat, ans, scalar);
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
@@ -128,6 +133,7 @@ int main(int argc, char **argv) {
             end = clock();
             opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
+            printf("TIME = %f\n", opTime);
             printf("%f\n", ans);
         } else {
             int ans;
@@ -137,6 +143,7 @@ int main(int argc, char **argv) {
             end = clock();
             opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
+            printf("TIME = %f\n", opTime);
             printf("%d\n", ans);
         }
 
@@ -164,7 +171,17 @@ int main(int argc, char **argv) {
             // failed to open file!
             free(mat1);
             free(mat2);
+            free(ans);
             printf("Failed to open matrices: %s and %s\n", mat1Path, mat2Path);
+            return EXIT_FAILURE;
+        }
+
+        // check equal dimensions
+        if (mat1->cols != mat2->cols || mat1->rows != mat2->rows) {
+            free(mat1);
+            free(mat2);
+            free(ans);
+            printf("Matrices must be same dimensions for addition!\n");
             return EXIT_FAILURE;
         }
 
@@ -172,6 +189,10 @@ int main(int argc, char **argv) {
         matrixAddition(mat1, mat2, ans);
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        for (int i = 0; i < ans->nzsize; i++) {
+            printf("%d ", ((COO_ENTRY_INT *)ans->NZ[i])->val);
+        }
 
         if (lflag) {
             // TODO: log output
