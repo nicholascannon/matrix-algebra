@@ -22,7 +22,7 @@ static void getFilePath(char* op, char* filepath) {
     struct tm* tm_info;
     tm_info = localtime(&timer);
     char timestr[14];
-    strftime(timestr, 13, "%d%m%Y_%H%M", tm_info);
+    strftime(timestr, 14, "%d%m%Y_%H%M", tm_info);
 
     // Format log filename
     char* filename = malloc(sizeof(char) * LOG_FILENAME_LEN);
@@ -30,8 +30,8 @@ static void getFilePath(char* op, char* filepath) {
              STUDENT_NUM, timestr, op);
 
     // Construct full path
-    strcat(filepath, LOG_PATH);
-    strcat(filepath, filename);
+    strcpy(filepath, LOG_PATH);
+    strncat(filepath, filename, strlen(filename));
     free(filename);
 }
 
@@ -61,8 +61,65 @@ int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
     fprintf(f, "%d\n", mat->cols);
 
     // expand matrix
-    fprintf(f, "matrix goes here!\n");
+    int i = 0;
+    int row = 0;
+    int col = 0;
+    if (mat->type == MAT_FLOAT) {
+        while (i < mat->nzsize) {
+            if (mat->NZ[i]->row == row && mat->NZ[i]->col == col) {
+                fprintf(f, "%f ", ((COO_ENTRY_FLOAT*)mat->NZ[i])->val);
 
+                i++;  // move to next non-zero element
+
+                // update our indexes to the next position in sparse matrix
+                col++;
+                if (col == mat->cols) {
+                    row++;
+                    col = 0;
+                }
+            } else {
+                // calculate the number of zeroes before this non-zero element
+                int zCount = mat->cols * (mat->NZ[i]->row - row) +
+                             (mat->NZ[i]->col - col);
+
+                for (int j = 0; j < zCount; j++) {
+                    fprintf(f, "0.0 ");
+                }
+
+                // set indexes to next non zero element
+                row = mat->NZ[i]->row;
+                col = mat->NZ[i]->col;
+            }
+        }
+    } else {
+        while (i < mat->nzsize) {
+            if (mat->NZ[i]->row == row && mat->NZ[i]->col == col) {
+                fprintf(f, "%d ", ((COO_ENTRY_INT*)mat->NZ[i])->val);
+
+                i++;  // move to next non-zero element
+
+                // update our indexes to the next position in sparse matrix
+                col++;
+                if (col == mat->cols) {
+                    row++;
+                    col = 0;
+                }
+            } else {
+                // calculate the number of zeroes before this non-zero element
+                int zCount = mat->cols * (mat->NZ[i]->row - row) +
+                             (mat->NZ[i]->col - col);
+
+                for (int j = 0; j < zCount; j++) {
+                    fprintf(f, "0 ");
+                }
+
+                // set indexes to next non zero element
+                row = mat->NZ[i]->row;
+                col = mat->NZ[i]->col;
+            }
+        }
+    }
+    fprintf(f, "\n");
     // log timing details
     fprintf(f, "%f\n", loadTime);
     fprintf(f, "%f\n", opTime);

@@ -4,6 +4,7 @@
  * Written by Nicholas Cannon (22241579)
  */
 #include <omp.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "parseMatrix.h"
@@ -129,7 +130,7 @@ int matrixAddition(COO *mat1, COO *mat2, COO *ans) {
                 m2i++;
             } else if (mat1->NZ[m1i]->row == mat2->NZ[m2i]->row) {
                 // rows match
-                if (mat1->NZ[m1i]->col < mat2->NZ[m1i]->col) {
+                if (mat1->NZ[m1i]->col < mat2->NZ[m2i]->col) {
                     // mat1 entry has a smaller position
                     *fl = *((COO_ENTRY_FLOAT *)mat1->NZ[m1i]);
                     m1i++;
@@ -206,7 +207,7 @@ int matrixAddition(COO *mat1, COO *mat2, COO *ans) {
                 m2i++;
             } else if (mat1->NZ[m1i]->row == mat2->NZ[m2i]->row) {
                 // rows match
-                if (mat1->NZ[m1i]->col < mat2->NZ[m1i]->col) {
+                if (mat1->NZ[m1i]->col < mat2->NZ[m2i]->col) {
                     // mat1 entry has a smaller position
                     *fl = *((COO_ENTRY_INT *)mat1->NZ[m1i]);
                     m1i++;

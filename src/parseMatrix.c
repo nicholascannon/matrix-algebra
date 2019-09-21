@@ -211,7 +211,7 @@ int readCSR(char *matFile, CS *mat) {
 /**
  * Parses matFile into CSC matrix. Returns non zero on failure.
  */
-int readCSC(char *matFile, CS *mat){
+int readCSC(char *matFile, CS *mat) {
     // FILE *fp;
     // char line[BUFSIZ];
     // char *token;
