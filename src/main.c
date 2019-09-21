@@ -57,10 +57,6 @@ int main(int argc, char **argv) {
         omp_set_num_threads(threadNum);
     }
 
-    // TODO: parse matrix files and convert into matrix formats and time process
-    // TODO: do matrix op and time process
-    // TODO: if lflag then log to file
-
     if (strcmp(matOp, "sm") == 0) {
         /* SCALAR MULTIPLICATION */
         float scalar = atof(argv[2]);  // argument just after --sm
@@ -88,7 +84,8 @@ int main(int argc, char **argv) {
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (lflag) {
-            // TODO: log answer
+            logCOO(matOp, mat1Path, NULL, threadNum, ans, loadTime, opTime,
+                   argv[2]);
         }
 
         // clean up our allocations
@@ -193,8 +190,8 @@ int main(int argc, char **argv) {
 
         if (lflag) {
             // log output
-            logCOO(matOp, mat1Path, mat2Path, omp_get_thread_num(), ans,
-                   loadTime, opTime);
+            logCOO(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
+                   NULL);
         }
 
         // free up memory

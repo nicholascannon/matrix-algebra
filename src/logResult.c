@@ -40,7 +40,7 @@ static void getFilePath(char* op, char* filepath) {
  * non-zero on failure.
  */
 int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
-           float loadTime, float opTime) {
+           float loadTime, float opTime, char* scalar) {
     FILE* f;
 
     // create file path
@@ -52,7 +52,11 @@ int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
     if (f == NULL) return -1;
 
     // write header info
-    fprintf(f, "%s\n", op);
+    if (scalar) {
+        fprintf(f, "%s %s\n", op, scalar);
+    } else {
+        fprintf(f, "%s\n", op);
+    }
     fprintf(f, "%s\n", file1);
     if (file2) fprintf(f, "%s\n", file2);
     if (threadNum) fprintf(f, "%d\n", threadNum);
