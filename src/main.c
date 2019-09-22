@@ -233,6 +233,59 @@ int main(int argc, char **argv) {
         free(ans);
     } else if (strcmp(matOp, "mm") == 0) {
         /* MATRIX MULTIPLICATION */
+        int status2 = 0;
+        CS *mat1 = (CS *)malloc(sizeof(CS));
+        CS *mat2 = (CS *)malloc(sizeof(CS));
+        CS *ans = (CS *)malloc(sizeof(CS));
+
+        if (strcmp(mat1Path, mat2Path) == 0) {
+            // no point reading same file twice!
+            start = clock();
+            status = readCOO(mat1Path, mat1);
+            *mat2 = *mat1;
+            end = clock();
+        } else {
+            // read in both matrices
+            start = clock();
+            status = readCOO(mat1Path, mat1);
+            status2 = readCOO(mat2Path, mat2);
+            end = clock();
+        }
+        loadTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (status == -1 || status2 == -1) {
+            // failed to open file!
+            free(mat1);
+            free(mat2);
+            free(ans);
+            printf("Failed to open matrices: %s and %s\n", mat1Path, mat2Path);
+            return EXIT_FAILURE;
+        }
+
+        // check equal dimensions
+        if (mat1->cols != mat2->cols || mat1->rows != mat2->rows) {
+            free(mat1);
+            free(mat2);
+            free(ans);
+            printf("Matrices must be same dimensions for addition!\n");
+            return EXIT_FAILURE;
+        }
+
+        start = clock();
+        matrixMultiplication(mat1, mat2, ans);
+        end = clock();
+        opTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (lflag) {
+            // log output
+            logCOO(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
+                   NULL);
+        }
+
+        // free up memory
+        free(mat1);
+        free(mat2);
+        free(ans);
     } else {
         /* INVALID OPERATION */
         printf("Invalid matrix operation!\n");

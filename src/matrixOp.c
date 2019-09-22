@@ -292,3 +292,12 @@ int matrixTranspose(COO *mat, COO *ans) {
 
     return 0;
 }
+
+/**
+ * Performs matrix multiplication between mat1 and mat2 and stores the answer in
+ * matrix ans. Returns non-zero on failure.
+ */
+int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
+    // comment
+    return 0;
+}
