@@ -22,23 +22,14 @@ int scalarMultiplication(COO *mat, COO *ans, float scalar) {
     *ans = *mat;  // copy over meta info for answer matrix
 
     if (mat->type == MAT_FLOAT) {
-        ans->NZ = malloc(ans->nzsize * sizeof(COO_ENTRY_FLOAT));
 #pragma omp parallel for
         for (i = 0; i < mat->nzsize; i++) {
-            COO_ENTRY_FLOAT *fl =
-                (COO_ENTRY_FLOAT *)malloc(sizeof(COO_ENTRY_FLOAT));
-            *fl = *((COO_ENTRY_FLOAT *)mat->NZ[i]);
-            fl->val = fl->val * scalar;
-            ans->NZ[i] = fl;
+            ((COO_ENTRY_FLOAT *)ans->NZ[i])->val *= scalar;
         }
     } else {
-        ans->NZ = malloc(ans->nzsize * sizeof(COO_ENTRY_INT));
 #pragma omp parallel for
         for (i = 0; i < mat->nzsize; i++) {
-            COO_ENTRY_INT *fl = (COO_ENTRY_INT *)malloc(sizeof(COO_ENTRY_INT));
-            *fl = *((COO_ENTRY_INT *)mat->NZ[i]);
-            fl->val = ((COO_ENTRY_INT *)mat->NZ[i])->val * scalar;
-            ans->NZ[i] = fl;
+            ((COO_ENTRY_INT *)ans->NZ[i])->val *= scalar;
         }
     }
 
