@@ -262,11 +262,6 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
 
-        // printf("%d\n", ((CS_ENTRY_INT*)mat->NNZ[0])->val);
-        // for (int a = 0; a < mat->nnzsize; a++) {
-        //     printf("%d\n", ((CS_ENTRY_INT*)mat->NNZ[a])->val);
-        // }
-
         // check equal dimensions
         if (mat1->cols != mat2->cols || mat1->rows != mat2->rows) {
             free(mat1);
@@ -277,16 +272,13 @@ int main(int argc, char **argv) {
         }
 
         start = clock();
-        // matrixMultiplication(mat1, mat2, ans);
+        matrixMultiplication(mat1, mat2, ans);
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (lflag) {
             // log output
-            // logCSR(matOp, mat1Path, mat2Path, threadNum, ans, loadTime,
-            // opTime,
-            //        NULL);
-            logCSR(matOp, mat1Path, mat2Path, threadNum, mat1, loadTime, opTime,
+            logCSR(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
                    NULL);
         }
 
