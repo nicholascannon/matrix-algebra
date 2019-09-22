@@ -241,14 +241,14 @@ int main(int argc, char **argv) {
         if (strcmp(mat1Path, mat2Path) == 0) {
             // no point reading same file twice!
             start = clock();
-            status = readCOO(mat1Path, mat1);
+            status = readCSR(mat1Path, mat1);
             *mat2 = *mat1;
             end = clock();
         } else {
             // read in both matrices
             start = clock();
-            status = readCOO(mat1Path, mat1);
-            status2 = readCOO(mat2Path, mat2);
+            status = readCSR(mat1Path, mat1);
+            status2 = readCSR(mat2Path, mat2);
             end = clock();
         }
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
@@ -262,6 +262,11 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
 
+        // printf("%d\n", ((CS_ENTRY_INT*)mat->NNZ[0])->val);
+        // for (int a = 0; a < mat->nnzsize; a++) {
+        //     printf("%d\n", ((CS_ENTRY_INT*)mat->NNZ[a])->val);
+        // }
+
         // check equal dimensions
         if (mat1->cols != mat2->cols || mat1->rows != mat2->rows) {
             free(mat1);
@@ -272,13 +277,16 @@ int main(int argc, char **argv) {
         }
 
         start = clock();
-        matrixMultiplication(mat1, mat2, ans);
+        // matrixMultiplication(mat1, mat2, ans);
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (lflag) {
             // log output
-            logCOO(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
+            // logCSR(matOp, mat1Path, mat2Path, threadNum, ans, loadTime,
+            // opTime,
+            //        NULL);
+            logCSR(matOp, mat1Path, mat2Path, threadNum, mat1, loadTime, opTime,
                    NULL);
         }
 

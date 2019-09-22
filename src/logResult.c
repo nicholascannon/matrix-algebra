@@ -140,5 +140,71 @@ int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
  */
 int logCSR(char* op, char* file1, char* file2, int threadNum, CS* mat,
            float loadTime, float opTime, char* scalar) {
+    FILE* f;
+
+    // create file path
+    char* fullPath = malloc(strlen(LOG_PATH) + LOG_FILENAME_LEN);
+    getFilePath(op, fullPath);
+
+    // create new log file
+    f = fopen(fullPath, "w");
+    if (f == NULL) return -1;
+
+    // write header info
+    if (scalar) {
+        fprintf(f, "%s %s\n", op, scalar);
+    } else {
+        fprintf(f, "%s\n", op);
+    }
+    fprintf(f, "%s\n", file1);
+    if (file2) fprintf(f, "%s\n", file2);
+    if (threadNum) fprintf(f, "%d\n", threadNum);
+    fprintf(f, "%s\n", mat->type == 0 ? "int" : "float");
+    fprintf(f, "%d\n", mat->rows);
+    fprintf(f, "%d\n", mat->cols);
+
+    printf("LOGGING\n");
+
+    // expand matrix
+    int i = 0;
+    if (mat->type == MAT_FLOAT) {
+    } else {
+        for (i = 0; i < mat->rows; i++) {
+            // find the number of non-zero elements on ith row
+            int nzCount = mat->IA[i + 1] - mat->IA[i];
+            if (nzCount == 0) {
+                // print mat->col zeroes to log
+                for (int j = 0; j < mat->cols; j++) {
+                    fprintf(f, "0 ");
+                }
+            } else {
+                // we have some non-zero elements on this row
+                int col = 0;
+                // loop through non-zero elements in this row
+                for (int j = mat->IA[i]; j <= mat->IA[i + 1] - 1; j++) {
+                    while (col < mat->JA[i]) {
+                        fprintf(f, "0 ");
+                        col++;
+                    }
+                    fprintf(f, "%d ", ((CS_ENTRY_INT*)mat->NNZ[j])->val);
+                    col++;
+                }
+
+                // print remaining zeroes to log if required
+                while (col < mat->cols) {
+                    fprintf(f, "0 ");
+                    col++;
+                }
+            }
+        }
+    }
+    fprintf(f, "\n");
+    // log timing details
+    fprintf(f, "%f\n", loadTime);
+    fprintf(f, "%f\n", opTime);
+
+    // clean up and exit
+    fclose(f);
+    free(fullPath);
     return 0;
 }

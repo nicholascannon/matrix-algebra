@@ -298,6 +298,37 @@ int matrixTranspose(COO *mat, COO *ans) {
  * matrix ans. Returns non-zero on failure.
  */
 int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
-    // comment
+    // check dimensions
+    if (mat1->cols != mat2->rows) {
+        return -1;
+    }
+
+    // set up the answer matrix
+    ans->rows = mat1->rows;
+    ans->cols = mat2->cols;
+    ans->type = mat1->type;
+    ans->nnzsize = 0;
+    ans->NNZ = NULL;
+    ans->JA = NULL;
+    ans->IA = malloc((ans->rows + 1) * sizeof(int));
+    ans->IA[0] = 0;  // convention
+
+    for (int i = 0; i < ans->rows; i++) {
+        int yi = 0;
+        for (int j = mat1->IA[i]; j < mat1->IA[i + 1] - 1; j++) {
+            yi = yi + ((CS_ENTRY_INT *)mat1->NNZ[j])->val *
+                          ((CS_ENTRY_INT *)mat2->NNZ[mat2->JA[j]])->val;
+        }
+
+        CS_ENTRY_INT *fl = malloc(sizeof(CS_ENTRY_INT));
+        fl->val = yi;
+
+        ans->NNZ = realloc(ans->NNZ, (ans->nnzsize + 1) * sizeof(CS_ENTRY_INT));
+        ans->JA = realloc(ans->JA, (ans->nnzsize + 1) * sizeof(int));
+        ans->NNZ[ans->nnzsize] = (CS_ENTRY_BASE *)fl;
+        ans->JA[ans->nnzsize] = i;
+        ans->nnzsize++;
+    }
+
     return 0;
 }
