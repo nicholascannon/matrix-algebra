@@ -161,33 +161,37 @@ int matrixAddition(COO *mat1, COO *mat2, COO *ans) {
         }
 
         // Fill rest of elements into answer matrix
-        if (m1i == mat1->nzsize) {
-            while (m2i != mat2->nzsize) {
+        if (m1i == mat1->nzsize && m2i < mat2->nzsize) {
+            // allocate enough memory for the rest of the elements
+            ans->NZ = realloc(ans->NZ, (mat2->nzsize - ans->nzsize + 1) *
+                                           sizeof(COO_ENTRY_FLOAT));
+
+            int i;
+#pragma omp parallel for
+            for (i = m2i; i < mat2->nzsize; i++) {
                 // create new entry
                 COO_ENTRY_FLOAT *fl =
                     (COO_ENTRY_FLOAT *)malloc(sizeof(COO_ENTRY_FLOAT));
-
-                *fl = *((COO_ENTRY_FLOAT *)mat2->NZ[m2i]);
-                m2i++;
+                *fl = *((COO_ENTRY_FLOAT *)mat2->NZ[i]);
 
                 // add new float entry to answer matrix
-                ans->NZ = realloc(ans->NZ,
-                                  (1 + ans->nzsize) * sizeof(COO_ENTRY_FLOAT));
                 ans->NZ[ans->nzsize] = fl;
                 ans->nzsize++;
             }
-        } else if (m2i == mat2->nzsize) {
-            while (m1i != mat1->nzsize) {
+        } else if (m2i == mat2->nzsize && m1i < mat1->nzsize) {
+            // allocate enough memory for the rest of the elements
+            ans->NZ = realloc(ans->NZ, (mat1->nzsize - ans->nzsize + 1) *
+                                           sizeof(COO_ENTRY_FLOAT));
+
+            int i;
+#pragma omp parallel for
+            for (i = m1i; i < mat1->nzsize; i++) {
                 // create new entry
                 COO_ENTRY_FLOAT *fl =
                     (COO_ENTRY_FLOAT *)malloc(sizeof(COO_ENTRY_FLOAT));
-
-                *fl = *((COO_ENTRY_FLOAT *)mat1->NZ[m1i]);
-                m1i++;
+                *fl = *((COO_ENTRY_FLOAT *)mat1->NZ[i]);
 
                 // add new float entry to answer matrix
-                ans->NZ = realloc(ans->NZ,
-                                  (1 + ans->nzsize) * sizeof(COO_ENTRY_FLOAT));
                 ans->NZ[ans->nzsize] = fl;
                 ans->nzsize++;
             }
@@ -238,33 +242,38 @@ int matrixAddition(COO *mat1, COO *mat2, COO *ans) {
         }
 
         // Fill rest of elements into answer matrix
-        if (m1i == mat1->nzsize) {
-            while (m2i != mat2->nzsize) {
+        if (m1i == mat1->nzsize && m2i < mat2->nzsize) {
+            // allocate enough memory for the rest of the elements
+            ans->NZ = realloc(ans->NZ,
+                              (mat2->nzsize - m2i + 1) * sizeof(COO_ENTRY_INT));
+            int i;
+#pragma omp parallel for
+            for (i = m2i; i < mat2->nzsize; i++) {
                 // create new entry
                 COO_ENTRY_INT *fl =
                     (COO_ENTRY_INT *)malloc(sizeof(COO_ENTRY_INT));
 
-                *fl = *((COO_ENTRY_INT *)mat2->NZ[m2i]);
-                m2i++;
+                *fl = *((COO_ENTRY_INT *)mat2->NZ[i]);
 
                 // add new float entry to answer matrix
-                ans->NZ =
-                    realloc(ans->NZ, (1 + ans->nzsize) * sizeof(COO_ENTRY_INT));
                 ans->NZ[ans->nzsize] = fl;
                 ans->nzsize++;
             }
-        } else if (m2i == mat2->nzsize) {
-            while (m1i != mat1->nzsize) {
+        } else if (m2i == mat2->nzsize && m1i < mat1->nzsize) {
+            // allocate enough memory for the rest of the elements
+            ans->NZ = realloc(ans->NZ,
+                              (mat1->nzsize - m1i + 1) * sizeof(COO_ENTRY_INT));
+
+            int i;
+#pragma omp parallel for
+            for (i = m1i; i < mat1->nzsize; i++) {
                 // create new entry
                 COO_ENTRY_INT *fl =
                     (COO_ENTRY_INT *)malloc(sizeof(COO_ENTRY_INT));
 
-                *fl = *((COO_ENTRY_INT *)mat1->NZ[m1i]);
-                m1i++;
+                *fl = *((COO_ENTRY_INT *)mat1->NZ[i]);
 
                 // add new float entry to answer matrix
-                ans->NZ =
-                    realloc(ans->NZ, (1 + ans->nzsize) * sizeof(COO_ENTRY_INT));
                 ans->NZ[ans->nzsize] = fl;
                 ans->nzsize++;
             }

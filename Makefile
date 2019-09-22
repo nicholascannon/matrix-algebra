@@ -7,7 +7,7 @@ SDIR=./src
 BDIR=./bin
 
 CC=gcc-9 # NOTE this may need to be changed depending on the system!
-CFLAGS=-Wall -Werror -pedantic -I$(IDIR) -Wno-incompatible-pointer-types
+CFLAGS=-Wall -Werror -pedantic -I$(IDIR) -Wno-incompatible-pointer-types -std=c99
 
 LIBS=-fopenmp
 SRCS=$(wildcard $(SDIR)/*.c)
