@@ -16,4 +16,9 @@ int logCOO(char* op, char* file1, char* file2, int threadNum, COO* mat,
            float loadTime, float opTime, char* scalar);
 int logCSR(char* op, char* file1, char* file2, int threadNum, CS* mat,
            float loadTime, float opTime, char* scalar);
+int logInt(char* op, char* file1, int threadNum, int number, float loadTime,
+           float opTime);
+int logFloat(char* op, char* file1, int threadNum, float number, float loadTime,
+             float opTime);
+
 #endif

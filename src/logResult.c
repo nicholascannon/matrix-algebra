@@ -36,6 +36,66 @@ static void getFilePath(char* op, char* filepath) {
 }
 
 /**
+ * Logs a single float value. Returns non-zero on failure.
+ */
+int logFloat(char* op, char* file1, int threadNum, float number, float loadTime,
+             float opTime) {
+    FILE* f;
+
+    // create file path
+    char* fullPath = malloc(strlen(LOG_PATH) + LOG_FILENAME_LEN);
+    getFilePath(op, fullPath);
+
+    // create new log file
+    f = fopen(fullPath, "w");
+    if (f == NULL) return -1;
+
+    // write header info
+    fprintf(f, "%s\n", op);
+    fprintf(f, "%s\n", file1);
+    if (threadNum) fprintf(f, "%d\n", threadNum);
+    fprintf(f, "%f\n", number);
+    // log timing details
+    fprintf(f, "%f\n", loadTime);
+    fprintf(f, "%f\n", opTime);
+
+    // clean up and exit
+    fclose(f);
+    free(fullPath);
+    return 0;
+}
+
+/**
+ * Logs a single int value. Returns non-zero on failure.
+ */
+int logInt(char* op, char* file1, int threadNum, int number, float loadTime,
+           float opTime) {
+    FILE* f;
+
+    // create file path
+    char* fullPath = malloc(strlen(LOG_PATH) + LOG_FILENAME_LEN);
+    getFilePath(op, fullPath);
+
+    // create new log file
+    f = fopen(fullPath, "w");
+    if (f == NULL) return -1;
+
+    // write header info
+    fprintf(f, "%s\n", op);
+    fprintf(f, "%s\n", file1);
+    if (threadNum) fprintf(f, "%d\n", threadNum);
+    fprintf(f, "%d\n", number);
+    // log timing details
+    fprintf(f, "%f\n", loadTime);
+    fprintf(f, "%f\n", opTime);
+
+    // clean up and exit
+    fclose(f);
+    free(fullPath);
+    return 0;
+}
+
+/**
  * Logs a COO matrix. 'file2' should be set to NULL if not required. Returns
  * non-zero on failure.
  */
@@ -168,6 +228,34 @@ int logCSR(char* op, char* file1, char* file2, int threadNum, CS* mat,
     // expand matrix
     int i = 0;
     if (mat->type == MAT_FLOAT) {
+        for (i = 0; i < mat->rows; i++) {
+            // find the number of non-zero elements on ith row
+            int nzCount = mat->IA[i + 1] - mat->IA[i];
+            if (nzCount == 0) {
+                // print mat->col zeroes to log
+                for (int j = 0; j < mat->cols; j++) {
+                    fprintf(f, "0.0 ");
+                }
+            } else {
+                // we have some non-zero elements on this row
+                int col = 0;
+                // loop through non-zero elements in this row
+                for (int j = mat->IA[i]; j <= mat->IA[i + 1] - 1; j++) {
+                    while (col < mat->JA[i]) {
+                        fprintf(f, "0.0 ");
+                        col++;
+                    }
+                    fprintf(f, "%f ", ((CS_ENTRY_FLOAT*)mat->NNZ[j])->val);
+                    col++;
+                }
+
+                // print remaining zeroes to log if required
+                while (col < mat->cols) {
+                    fprintf(f, "0.0 ");
+                    col++;
+                }
+            }
+        }
     } else {
         for (i = 0; i < mat->rows; i++) {
             // find the number of non-zero elements on ith row

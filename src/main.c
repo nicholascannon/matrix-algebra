@@ -15,6 +15,8 @@
 
 int main(int argc, char **argv) {
     int lflag = 0;
+    int loadFlag = 0;
+    int opFlag = 0;
     int threadNum = 0;  // non zero if set by CLA
     int optIndex;
     char *mat1Path, *mat2Path;
@@ -40,6 +42,12 @@ int main(int argc, char **argv) {
                     break;
                 case 't':
                     threadNum = atoi(argv[optIndex + 1]);
+                    break;
+                case 'L':
+                    loadFlag = 1;
+                    break;
+                case 'O':
+                    opFlag = 1;
                     break;
                 case 'f':
                     mat1Path = argv[optIndex + 1];
@@ -87,6 +95,12 @@ int main(int argc, char **argv) {
             logCOO(matOp, mat1Path, NULL, threadNum, ans, loadTime, opTime,
                    argv[2]);
         }
+        if (loadFlag) {
+            printf("%f\n", loadTime);
+        }
+        if (opFlag) {
+            printf("%f\n", opTime);
+        }
 
         // clean up our allocations
         free(mat);
@@ -124,8 +138,9 @@ int main(int argc, char **argv) {
             end = clock();
             opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
-            printf("TIME = %f\n", opTime);
-            printf("%f\n", ans);
+            if (lflag) {
+                logFloat(matOp, mat1Path, threadNum, ans, loadTime, opTime);
+            }
         } else {
             int ans;
 
@@ -134,12 +149,16 @@ int main(int argc, char **argv) {
             end = clock();
             opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
-            printf("TIME = %f\n", opTime);
-            printf("%d\n", ans);
+            if (lflag) {
+                logInt(matOp, mat1Path, threadNum, ans, loadTime, opTime);
+            }
         }
 
-        if (lflag) {
-            // TODO: log answer
+        if (loadFlag) {
+            printf("%f\n", loadTime);
+        }
+        if (opFlag) {
+            printf("%f\n", opTime);
         }
 
         free(mat);
@@ -193,6 +212,12 @@ int main(int argc, char **argv) {
             logCOO(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
                    NULL);
         }
+        if (loadFlag) {
+            printf("%f\n", loadTime);
+        }
+        if (opFlag) {
+            printf("%f\n", opTime);
+        }
 
         // free up memory
         free(mat1);
@@ -227,6 +252,12 @@ int main(int argc, char **argv) {
             logCOO(matOp, mat1Path, NULL, threadNum, ans, loadTime, opTime,
                    NULL);
         }
+        if (loadFlag) {
+            printf("%f\n", loadTime);
+        }
+        if (opFlag) {
+            printf("%f\n", opTime);
+        }
 
         // clean up our allocations
         free(mat);
@@ -241,14 +272,16 @@ int main(int argc, char **argv) {
         if (strcmp(mat1Path, mat2Path) == 0) {
             // no point reading same file twice!
             start = clock();
-            status = readCSR(mat1Path, mat1);
+            status = readCOO(mat1Path, mat1);
             *mat2 = *mat1;
             end = clock();
         } else {
             // read in both matrices
             start = clock();
-            status = readCSR(mat1Path, mat1);
-            status2 = readCSR(mat2Path, mat2);
+            // status = readCSR(mat1Path, mat1);
+            // status2 = readCSR(mat2Path, mat2);
+            status = readCOO(mat1Path, mat1);
+            status2 = readCOO(mat2Path, mat2);
             end = clock();
         }
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
@@ -278,14 +311,34 @@ int main(int argc, char **argv) {
 
         if (lflag) {
             // log output
-            logCSR(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
+            logCOO(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
                    NULL);
+        }
+        if (loadFlag) {
+            printf("%f\n", loadTime);
+        }
+        if (opFlag) {
+            printf("%f\n", opTime);
         }
 
         // free up memory
         free(mat1);
         free(mat2);
         free(ans);
+    } else if (strcmp(matOp, "ti") == 0) {
+        /* TIMING ONLY CSR */
+        CS *mat1 = (CS *)malloc(sizeof(CS));
+        start = clock();
+        status = readCSR(mat1Path, mat1);
+        end = clock();
+
+        loadTime = (double)(end - start) / CLOCKS_PER_SEC;
+
+        if (loadFlag) {
+            printf("%f\n", loadTime);
+        }
+
+        free(mat1);
     } else {
         /* INVALID OPERATION */
         printf("Invalid matrix operation!\n");
