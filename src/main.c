@@ -272,8 +272,6 @@ int main(int argc, char **argv) {
         // read in both matrices
         start = clock();
         status = readCSR(mat1Path, mat1);
-        // status2 = readCSR(mat2Path, mat2);
-        // status = readCOO(mat1Path, mat1);
         status2 = readCSC(mat2Path, mat2);
         end = clock();
         loadTime = (double)(end - start) / CLOCKS_PER_SEC;
@@ -287,23 +285,14 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
 
-        // check equal dimensions
-        if (mat1->cols != mat2->cols || mat1->rows != mat2->rows) {
-            free(mat1);
-            free(mat2);
-            free(ans);
-            printf("Matrices must be same dimensions for addition!\n");
-            return EXIT_FAILURE;
-        }
-
         start = clock();
-        // matrixMultiplication(mat1, mat2, ans);
+        matrixMultiplication(mat1, mat2, ans);
         end = clock();
         opTime = (double)(end - start) / CLOCKS_PER_SEC;
 
         if (lflag) {
             // log output
-            logCOO(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
+            logCSR(matOp, mat1Path, mat2Path, threadNum, ans, loadTime, opTime,
                    NULL);
         }
         if (loadFlag) {

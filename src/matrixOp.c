@@ -297,66 +297,75 @@ int matrixTranspose(COO *mat, COO *ans) {
  * Performs matrix multiplication between mat1 and mat2 and stores the answer in
  * matrix ans. Returns non-zero on failure.
  */
-// int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
-//     // check dimensions
-//     if (mat1->cols != mat2->rows) {
-//         return -1;
-//     }
-
-//     // set up the answer matrix
-//     ans->rows = mat1->rows;
-//     ans->cols = mat2->cols;
-//     ans->type = mat1->type;
-//     ans->nnzsize = 0;
-//     ans->NNZ = NULL;
-//     ans->JA = NULL;
-//     ans->IA = malloc((ans->rows + 1) * sizeof(int));
-//     memcpy(ans->IA, mat1->IA, (ans->rows + 1) * sizeof(int));
-
-//     if (ans->type == MAT_FLOAT) {
-//         for (int i = 0; i < mat1->rows; i++) {
-//             float yi = 0.0;
-//             for (int j = mat1->IA[i]; j <= mat1->IA[i + 1] - 1; j++) {
-//                 printf("mat1 val = %f row = %d col = %d\n",
-//                        ((CS_ENTRY_FLOAT *)mat1->NNZ[j])->val, i,
-//                        mat1->JA[j]);
-
-//                 yi += ((CS_ENTRY_FLOAT *)mat1->NNZ[j])->val *
-//                       ((CS_ENTRY_FLOAT *)mat2->NNZ[mat2->JA[j]])->val;
-//             }
-
-//             CS_ENTRY_FLOAT *fl = malloc(sizeof(CS_ENTRY_FLOAT));
-//             fl->val = yi;
-
-//             printf("%f\n", yi);
-
-//             ans->NNZ =
-//                 realloc(ans->NNZ, (ans->nnzsize + 1) *
-//                 sizeof(CS_ENTRY_FLOAT));
-//             ans->JA = realloc(ans->JA, (ans->nnzsize + 1) * sizeof(int));
-//             ans->NNZ[ans->nnzsize] = (CS_ENTRY_FLOAT *)fl;
-//             ans->JA[ans->nnzsize] = i;
-//             ans->nnzsize++;
-//         }
-
-//     } else {
-//         // loop through each row of mat1
-//         for (int i = 0; i < mat1->rows; i++) {
-//         }
-//     }
-
-//     // for (int i = 0; i < ans->nnzsize; i++) {
-//     //     printf("%d\n", ((CS_ENTRY_INT *)ans->NNZ[i])->val);
-//     // }
-
-//     return 0;
-// }
-
-int matrixMultiplication(COO *mat1, COO *mat2, COO *ans) {
+int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
     // check dimensions
     if (mat1->cols != mat2->rows) {
         return -1;
     }
+
+    // set up the answer matrix
+    ans->rows = mat1->rows;
+    ans->cols = mat2->cols;
+    ans->type = mat1->type;
+    ans->nnzsize = 0;
+    ans->NNZ = NULL;
+    ans->JA = NULL;
+    ans->IA = malloc((ans->rows + 1) * sizeof(int));
+
+    if (ans->type == MAT_FLOAT) {
+    } else {
+        for (int row = 0; row < ans->rows; row++) {
+            int nnzCount = 0;
+
+            // check if there are even any non-zeroes on this row
+            if (mat1->IA[row + 1] - mat1->IA[row] > 0) {
+                for (int col = 0; col < ans->cols; col++) {
+                    int val = 0;
+                    int r1 = mat1->IA[row];  // index of first non-zero on row
+                    int c2 = mat2->IA[col];  // index of first non-zero on col
+
+                    while (r1 < mat1->IA[row + 1] && c2 < mat2->IA[col + 1]) {
+                        if (mat1->JA[r1] == mat2->JA[c2]) {
+                            val += ((CS_ENTRY_INT *)mat1->NNZ[r1])->val *
+                                   ((CS_ENTRY_INT *)mat2->NNZ[c2])->val;
+
+                            r1++;
+                            c2++;
+                        } else if (mat1->JA[r1] < mat2->JA[c2]) {
+                            // multiplying r1 with 0
+                            r1++;
+                        } else {
+                            // multiplying c2 with 0
+                            c2++;
+                        }
+                    }
+
+                    if (val != 0) {
+                        // this entry has a non-zero entry! create new CSR entry
+                        CS_ENTRY_INT *fl = malloc(sizeof(CS_ENTRY_INT));
+                        fl->val = val;
+
+                        ans->NNZ = realloc(ans->NNZ, (ans->nnzsize + 1) *
+                                                         sizeof(CS_ENTRY_INT));
+                        ans->JA =
+                            realloc(ans->JA, (ans->nnzsize + 1) * sizeof(int));
+
+                        ans->NNZ[ans->nnzsize] = (CS_ENTRY_BASE *)fl;
+                        ans->JA[ans->nnzsize] = col;
+
+                        ans->nnzsize++;
+                        nnzCount++;
+                    }
+                }
+            }
+            // update IA array
+            ans->IA[row + 1] = ans->IA[row] + nnzCount;
+        }
+    }
+
+    // for (int i = 0; i < ans->nnzsize; i++) {
+    //     printf("%d\n", ((CS_ENTRY_INT *)ans->NNZ[i])->val);
+    // }
 
     return 0;
 }
