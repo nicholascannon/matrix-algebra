@@ -411,9 +411,5 @@ int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
         }
     }
 
-    for (int i = 0; i < ans->nnzsize; i++) {
-        printf("%d\n", ((CS_ENTRY_INT *)ans->NNZ[i])->val);
-    }
-
     return 0;
 }
