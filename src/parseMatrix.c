@@ -117,7 +117,7 @@ int readCSR(char *matFile, CS *mat) {
     // open file and check for errors
     fp = fopen(matFile, "r");
     if (fp == NULL) {
-        return 1;
+        return -1;
     }
 
     // get data type
@@ -222,7 +222,7 @@ int readCSC(char *matFile, CS *mat) {
     // open file and check for errors
     fp = fopen(matFile, "r");
     if (fp == NULL) {
-        return 1;
+        return -1;
     }
 
     // get data type
@@ -250,11 +250,14 @@ int readCSC(char *matFile, CS *mat) {
 
     if (mat->type == MAT_FLOAT) {
         // Read in all the matrix data into buffer
-        float matData[mat->rows * mat->cols];
+        float *matData = (float *)malloc(sizeof(float) * mat->rows * mat->cols);
         int i = 0;
         while (fgets(line, BUFSIZ, fp) != NULL) {
             token = strtok(line, " ");
             while (token != NULL) {
+                if (i >= mat->rows * mat->cols) {
+                    break;
+                }
                 matData[i] = atof(token);
                 i++;
                 token = strtok(NULL, " ");
@@ -294,11 +297,14 @@ int readCSC(char *matFile, CS *mat) {
         }
     } else {
         // Read in all the matrix data into buffer
-        int matData[mat->rows * mat->cols];
+        int *matData = malloc(mat->rows * mat->cols * sizeof(int));
         int i = 0;
         while (fgets(line, BUFSIZ, fp) != NULL) {
             token = strtok(line, " ");
             while (token != NULL) {
+                if (i >= mat->rows * mat->cols) {
+                    break;
+                }
                 matData[i] = atoi(token);
                 i++;
                 token = strtok(NULL, " ");
