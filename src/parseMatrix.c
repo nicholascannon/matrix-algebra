@@ -212,65 +212,132 @@ int readCSR(char *matFile, CS *mat) {
  * Parses matFile into CSC matrix. Returns non zero on failure.
  */
 int readCSC(char *matFile, CS *mat) {
-    // FILE *fp;
-    // char line[BUFSIZ];
-    // char *token;
-    // int col = 0;
-    // int row = 0;
-    // int nnzCount = 0;
+    FILE *fp;
+    char line[BUFSIZ];
+    char *token;
+    int col = 0;
+    int row = 0;
+    int nnzCount = 0;
 
-    // // open file and check for errors
-    // fp = fopen(matFile, "r");
-    // if (fp == NULL) {
-    //     return 1;
-    // }
+    // open file and check for errors
+    fp = fopen(matFile, "r");
+    if (fp == NULL) {
+        return 1;
+    }
 
-    // // get data type
-    // fgets(line, BUFSIZ, fp);
-    // line[strcspn(line, "\n")] = '\0';  // remove new line for comparison
-    // if (strcmp(line, "int") == 0) {
-    //     mat->type = MAT_INT;
-    // } else {
-    //     mat->type = MAT_FLOAT;
-    // }
+    // get data type
+    fgets(line, BUFSIZ, fp);
+    line[strcspn(line, "\n")] = '\0';  // remove new line for comparison
+    if (strcmp(line, "int") == 0) {
+        mat->type = MAT_INT;
+    } else {
+        mat->type = MAT_FLOAT;
+    }
 
-    // // get rows and cols
-    // fgets(line, BUFSIZ, fp);
-    // mat->rows = atoi(line);
-    // fgets(line, BUFSIZ, fp);
-    // mat->cols = atoi(line);
+    // get rows and cols
+    fgets(line, BUFSIZ, fp);
+    mat->rows = atoi(line);
+    fgets(line, BUFSIZ, fp);
+    mat->cols = atoi(line);
 
-    // // Initialise IA array
-    // mat->IA = malloc((mat->rows + 1) * sizeof(int));
-    // mat->IA[0] = 0;  // convention
+    // Initialise IA array
+    mat->IA = malloc((mat->cols + 1) * sizeof(int));
+    mat->IA[0] = 0;  // convention
 
-    // mat->NNZ = NULL;
-    // mat->JA = NULL;
-    // mat->nnzsize = 0;
+    mat->NNZ = NULL;
+    mat->JA = NULL;
+    mat->nnzsize = 0;
 
-    // // process matrix data
-    // while (fgets(line, BUFSIZ, fp) != NULL) {
-    //     token = strtok(line, " ");
+    if (mat->type == MAT_FLOAT) {
+        // Read in all the matrix data into buffer
+        float matData[mat->rows * mat->cols];
+        int i = 0;
+        while (fgets(line, BUFSIZ, fp) != NULL) {
+            token = strtok(line, " ");
+            while (token != NULL) {
+                matData[i] = atof(token);
+                i++;
+                token = strtok(NULL, " ");
+            }
+        }
 
-    //     while (token != NULL) {
-    //         if (mat->type == MAT_FLOAT) {
-    //             // process floats
-    //             float val = atof(token);
+        // process matrix data in column major order
+        int mi = 0;
+        while (col < mat->cols) {
+            if (matData[mi] > 0.0 || matData[mi] < 0.0) {
+                // this is a non zero
+                CS_ENTRY_FLOAT *fl = malloc(sizeof(CS_ENTRY_FLOAT));
+                fl->val = matData[mi];
 
-    //             if (val > 0.0 || val < 0.0) {
-    //             }
-    //         } else {
-    //             // process ints
-    //             int val = atoi(token);
+                mat->NNZ = realloc(mat->NNZ,
+                                   (mat->nnzsize + 1) * sizeof(CS_ENTRY_FLOAT));
+                mat->JA = realloc(mat->JA, (mat->nnzsize + 1) * sizeof(int));
 
-    //             if (val > 0 || val < 0) {
-    //             }
-    //         }
+                mat->NNZ[mat->nnzsize] = (CS_ENTRY_FLOAT *)fl;
+                mat->JA[mat->nnzsize] = row;
 
-    //         token = strtok(NULL, " ");
-    //     }
-    // }
+                mat->nnzsize++;
+                nnzCount++;
+            }
 
-    // fclose(fp);
+            // increment to the next row (same column)
+            mi += mat->cols;
+            row++;
+            if (row == mat->rows) {
+                // wrap around to next column
+                mat->IA[col + 1] = mat->IA[col] + nnzCount;
+                nnzCount = 0;
+                col++;
+                mi = col;
+                row = 0;
+            }
+        }
+    } else {
+        // Read in all the matrix data into buffer
+        int matData[mat->rows * mat->cols];
+        int i = 0;
+        while (fgets(line, BUFSIZ, fp) != NULL) {
+            token = strtok(line, " ");
+            while (token != NULL) {
+                matData[i] = atoi(token);
+                i++;
+                token = strtok(NULL, " ");
+            }
+        }
+
+        // process matrix data in column major order
+        int mi = 0;
+        while (col < mat->cols) {
+            if (matData[mi] > 0 || matData[mi] < 0) {
+                // this is a non zero
+                CS_ENTRY_INT *fl = malloc(sizeof(CS_ENTRY_INT));
+                fl->val = matData[mi];
+
+                mat->NNZ = realloc(mat->NNZ,
+                                   (mat->nnzsize + 1) * sizeof(CS_ENTRY_INT));
+                mat->JA = realloc(mat->JA, (mat->nnzsize + 1) * sizeof(int));
+
+                mat->NNZ[mat->nnzsize] = (CS_ENTRY_INT *)fl;
+                mat->JA[mat->nnzsize] = row;
+
+                mat->nnzsize++;
+                nnzCount++;
+            }
+
+            // increment to the next row (same column)
+            mi += mat->cols;
+            row++;
+            if (row == mat->rows) {
+                // wrap around to next column
+                mat->IA[col + 1] = mat->IA[col] + nnzCount;
+                nnzCount = 0;
+                col++;
+                mi = col;
+                row = 0;
+            }
+        }
+    }
+
+    fclose(fp);
     return 0;
 }
