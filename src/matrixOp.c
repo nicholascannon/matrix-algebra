@@ -313,6 +313,54 @@ int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
     ans->IA = malloc((ans->rows + 1) * sizeof(int));
 
     if (ans->type == MAT_FLOAT) {
+        for (int row = 0; row < ans->rows; row++) {
+            int nnzCount = 0;
+
+            // check if there are even any non-zeroes on this row
+            if (mat1->IA[row + 1] - mat1->IA[row] > 0) {
+                for (int col = 0; col < ans->cols; col++) {
+                    float val = 0.0;
+                    int r1 = mat1->IA[row];  // index of first non-zero on row
+                    int c2 = mat2->IA[col];  // index of first non-zero on col
+
+                    while (r1 < mat1->IA[row + 1] && c2 < mat2->IA[col + 1]) {
+                        if (mat1->JA[r1] == mat2->JA[c2]) {
+                            val += ((CS_ENTRY_FLOAT *)mat1->NNZ[r1])->val *
+                                   ((CS_ENTRY_FLOAT *)mat2->NNZ[c2])->val;
+
+                            r1++;
+                            c2++;
+                        } else if (mat1->JA[r1] < mat2->JA[c2]) {
+                            // multiplying r1 with 0
+                            r1++;
+                        } else {
+                            // multiplying c2 with 0
+                            c2++;
+                        }
+                    }
+
+                    if (val != 0) {
+                        // this entry has a non-zero entry! create new CSR entry
+                        CS_ENTRY_FLOAT *fl = malloc(sizeof(CS_ENTRY_FLOAT));
+                        fl->val = val;
+
+                        ans->NNZ =
+                            realloc(ans->NNZ, (ans->nnzsize + 1) *
+                                                  sizeof(CS_ENTRY_FLOAT));
+                        ans->JA =
+                            realloc(ans->JA, (ans->nnzsize + 1) * sizeof(int));
+
+                        ans->NNZ[ans->nnzsize] = (CS_ENTRY_FLOAT *)fl;
+                        ans->JA[ans->nnzsize] = col;
+
+                        ans->nnzsize++;
+                        nnzCount++;
+                    }
+                }
+            }
+            // update IA array
+            ans->IA[row + 1] = ans->IA[row] + nnzCount;
+        }
     } else {
         for (int row = 0; row < ans->rows; row++) {
             int nnzCount = 0;
@@ -363,9 +411,9 @@ int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
         }
     }
 
-    // for (int i = 0; i < ans->nnzsize; i++) {
-    //     printf("%d\n", ((CS_ENTRY_INT *)ans->NNZ[i])->val);
-    // }
+    for (int i = 0; i < ans->nnzsize; i++) {
+        printf("%d\n", ((CS_ENTRY_INT *)ans->NNZ[i])->val);
+    }
 
     return 0;
 }
