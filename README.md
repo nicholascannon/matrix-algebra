@@ -2,10 +2,20 @@
 
 Written by Nicholas Cannon (22241579)
 
+## Folders
+
+- `bin/` -> contains compiled executable.
+- `data/` -> Sample matrix data and sample output logs.
+- `docs/` -> Contains report and excel document used to generate graphs.
+- `include/` -> Application header files.
+- `obj/` -> compiled object files (run make clean to remove).
+- `scripts/` -> Simple bash scripts to test application performance.
+- `src/` -> Source code for the application.
+
 ## Make commands
 
-- `make` -> compiles and builds executable
-- `make run` -> runs executable in ./bin
+- `make` -> compiles and builds executable into bin folder
+- `make run` -> runs executable in bin folder
 - `make clean` -> cleans project (removes object files)
 
 ## Command line args
@@ -17,6 +27,9 @@ Written by Nicholas Cannon (22241579)
 - `--mm -f mat1.in mat2.in` -> matrix multiplication
 - `-t %d` -> number of threads to use
 - `-l` -> log to file
+- `-O` -> print operation time to stdout
+- `-L` -> print load time to stdout
+- `ti` -> time CSR loading with given matrix
 
 ## NOTE
 
