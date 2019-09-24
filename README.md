@@ -26,7 +26,7 @@ Written by Nicholas Cannon (22241579)
 - `--ts -f mat1.in` -> matrix transposition
 - `--mm -f mat1.in mat2.in` -> matrix multiplication
 - `-t %d` -> number of threads to use
-- `-l` -> log to file
+- `-l` -> Writes to logfile. Logfiles can be found in `data/logs/`
 - `-O` -> print operation time to stdout
 - `-L` -> print load time to stdout
 - `ti` -> time CSR loading with given matrix
