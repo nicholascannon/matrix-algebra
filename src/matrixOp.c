@@ -307,16 +307,12 @@ int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
     ans->rows = mat1->rows;
     ans->cols = mat2->cols;
     ans->type = mat1->type;
-    ans->nnzsize = mat1->nnzsize;
+    ans->nnzsize = 0;
+    ans->NNZ = NULL;
+    ans->JA = NULL;
     ans->IA = malloc((ans->rows + 1) * sizeof(int));
-    memcpy(ans->IA, mat1->IA, sizeof(int) * (ans->rows + 1));
-    ans->JA = malloc(sizeof(int) * ans->nnzsize);
-    memcpy(ans->JA, mat1->JA, sizeof(int) * ans->nnzsize);
 
     if (ans->type == MAT_FLOAT) {
-        // allocate memory for all non-zero entries
-        ans->NNZ = malloc(sizeof(CS_ENTRY_FLOAT) * ans->nnzsize);
-
         for (int row = 0; row < ans->rows; row++) {
             int nnzCount = 0;
 
@@ -348,72 +344,70 @@ int matrixMultiplication(CS *mat1, CS *mat2, CS *ans) {
                         CS_ENTRY_FLOAT *fl = malloc(sizeof(CS_ENTRY_FLOAT));
                         fl->val = val;
 
-                        // ans->NNZ =
-                        //     realloc(ans->NNZ, (ans->nnzsize + 1) *
-                        //                           sizeof(CS_ENTRY_FLOAT));
-                        // ans->JA =
-                        //     realloc(ans->JA, (ans->nnzsize + 1) *
-                        //     sizeof(int));
+                        ans->NNZ =
+                            realloc(ans->NNZ, (ans->nnzsize + 1) *
+                                                  sizeof(CS_ENTRY_FLOAT));
+                        ans->JA =
+                            realloc(ans->JA, (ans->nnzsize + 1) * sizeof(int));
 
                         ans->NNZ[ans->nnzsize] = (CS_ENTRY_FLOAT *)fl;
                         ans->JA[ans->nnzsize] = col;
 
-                        // ans->nnzsize++;
+                        ans->nnzsize++;
                         nnzCount++;
                     }
                 }
             }
             // update IA array
-            // ans->IA[row + 1] = ans->IA[row] + nnzCount;
+            ans->IA[row + 1] = ans->IA[row] + nnzCount;
         }
     } else {
-        // allocate memory for all non-zero entries
-        ans->NNZ = malloc(sizeof(CS_ENTRY_INT) * ans->nnzsize);
-        // int currentNnz = 0;
-
         for (int row = 0; row < ans->rows; row++) {
+            int nnzCount = 0;
+
             // check if there are even any non-zeroes on this row
-            if (mat1->IA[row + 1] - mat1->IA[row] == 0) continue;
+            if (mat1->IA[row + 1] - mat1->IA[row] > 0) {
+                for (int col = 0; col < ans->cols; col++) {
+                    int val = 0;
+                    int r1 = mat1->IA[row];  // index of first non-zero on row
+                    int c2 = mat2->IA[col];  // index of first non-zero on col
 
-            for (int col = 0; col < ans->cols; col++) {
-                // check if there are any non-zeroes in this col
-                if (mat2->IA[col + 1] - mat2->IA[col] == 0) continue;
+                    while (r1 < mat1->IA[row + 1] && c2 < mat2->IA[col + 1]) {
+                        if (mat1->JA[r1] == mat2->JA[c2]) {
+                            val += ((CS_ENTRY_INT *)mat1->NNZ[r1])->val *
+                                   ((CS_ENTRY_INT *)mat2->NNZ[c2])->val;
 
-                int val = 0;
-                int r1 = mat1->IA[row];  // index of first non-zero on row
-                int c2 = mat2->IA[col];  // index of first non-zero on col
+                            r1++;
+                            c2++;
+                        } else if (mat1->JA[r1] < mat2->JA[c2]) {
+                            // multiplying r1 with 0
+                            r1++;
+                        } else {
+                            // multiplying c2 with 0
+                            c2++;
+                        }
+                    }
 
-                while (r1 < mat1->IA[row + 1] && c2 < mat2->IA[col + 1]) {
-                    if (mat1->JA[r1] == mat2->JA[c2]) {
-                        val += ((CS_ENTRY_INT *)mat1->NNZ[r1])->val *
-                               ((CS_ENTRY_INT *)mat2->NNZ[c2])->val;
+                    if (val != 0) {
+                        // this entry has a non-zero entry! create new CSR entry
+                        CS_ENTRY_INT *fl = malloc(sizeof(CS_ENTRY_INT));
+                        fl->val = val;
 
-                        r1++;
-                        c2++;
-                    } else if (mat1->JA[r1] < mat2->JA[c2]) {
-                        // multiplying r1 with 0
-                        r1++;
-                    } else {
-                        // multiplying c2 with 0
-                        c2++;
+                        ans->NNZ = realloc(ans->NNZ, (ans->nnzsize + 1) *
+                                                         sizeof(CS_ENTRY_INT));
+                        ans->JA =
+                            realloc(ans->JA, (ans->nnzsize + 1) * sizeof(int));
+
+                        ans->NNZ[ans->nnzsize] = (CS_ENTRY_BASE *)fl;
+                        ans->JA[ans->nnzsize] = col;
+
+                        ans->nnzsize++;
+                        nnzCount++;
                     }
                 }
-
-                if (val != 0) {
-                    // this entry has a non-zero entry! create new CSR entry
-                    CS_ENTRY_INT *fl = malloc(sizeof(CS_ENTRY_INT));
-                    fl->val = val;
-
-                    // ans->NNZ = realloc(ans->NNZ, (ans->nnzsize + 1) *
-                    //                                  sizeof(CS_ENTRY_INT));
-                    // ans->JA =
-                    //     realloc(ans->JA, (ans->nnzsize + 1) *
-                    //     sizeof(int));
-
-                    ans->NNZ[mat1->IA[row]] = (CS_ENTRY_BASE *)fl;
-                    // ans->JA[ans->nnzsize] = col;
-                }
             }
+            // update IA array
+            ans->IA[row + 1] = ans->IA[row] + nnzCount;
         }
     }
 
