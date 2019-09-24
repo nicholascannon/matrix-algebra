@@ -3,6 +3,8 @@
 
 .vscode/
 
+docs/~$*
+
 bin/*
 
 # Prerequisites
