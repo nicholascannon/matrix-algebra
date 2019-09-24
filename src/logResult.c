@@ -223,8 +223,6 @@ int logCSR(char* op, char* file1, char* file2, int threadNum, CS* mat,
     fprintf(f, "%d\n", mat->rows);
     fprintf(f, "%d\n", mat->cols);
 
-    printf("LOGGING\n");
-
     // expand matrix
     int i = 0;
     if (mat->type == MAT_FLOAT) {
