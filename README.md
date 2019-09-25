@@ -18,6 +18,12 @@ Written by Nicholas Cannon (22241579)
 - `make run` -> runs executable in bin folder
 - `make clean` -> cleans project (removes object files)
 
+## Running the application
+
+Simple example of running the appliaction with the make file:
+
+    make run ARGS="--sm 4 -t 4 -l -f data/matrices/int1.in"
+
 ## Command line args
 
 - `--sm -f mat1.in` -> scalar multiplication
