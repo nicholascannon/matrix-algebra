@@ -6,7 +6,7 @@ Written by Nicholas Cannon (22241579)
 
 - `bin/` -> contains compiled executable.
 - `data/` -> Sample matrix data and sample output logs.
-- `docs/` -> Contains report and excel document used to generate graphs.
+- `docs/` -> **Contains report and excel document used to generate graphs.**
 - `include/` -> Application header files.
 - `obj/` -> compiled object files (run make clean to remove).
 - `scripts/` -> Simple bash scripts to test application performance.
