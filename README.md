@@ -1,4 +1,4 @@
-# CITS3402 Project 1: Matrix Multiplication
+# Matrix Algebra Application
 
 Written by Nicholas Cannon (22241579)
 
@@ -36,7 +36,3 @@ Simple example of running the appliaction with the make file:
 - `-O` -> print operation time to stdout
 - `-L` -> print load time to stdout
 - `ti` -> time CSR loading with given matrix
-
-## NOTE
-
-May need to change the `CC` value in makefile. I'm running on osx and had to use gcc-9 as gcc is just a symlink to clang on osx =(
