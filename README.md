@@ -23,6 +23,8 @@ Simple example of running the appliaction with the make file:
 
     make run ARGS="--sm 4 -t 4 -l -f data/matrices/int1.in"
 
+The above example multiplies the matrix stored in `data/matrices/int1.in` by the scalar 4, uses 4 threads and logs the output to file.
+
 ## Make commands
 
 - `make` -> compiles and builds executable into bin folder
